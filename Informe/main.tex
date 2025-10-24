@@ -1,0 +1,159 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+% Paquetes
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+% --- SOLUCIONES DE FORMATO Y ENLACES ---
+% Se mantiene hyperref y se elimina doi (redundante, aunque no causa error)
+\usepackage{hyperref} 
+
+% Solución CRÍTICA para forzar "Keywords" en lugar de "Index Terms"
+\makeatletter
+\def\def@IEEEkeywordsname#1{\def\@IEEEkeywordsname{#1}}
+\def@IEEEkeywordsname{Keywords}
+\makeatother
+
+% Configuración de Hyperref para los DOIs
+\hypersetup{
+    colorlinks=true,
+    urlcolor=blue,      
+    linkcolor=black,    
+    citecolor=black     
+}
+% ----------------------------------------
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% CORRECCIÓN CRÍTICA: Mover \AtBeginDocument al preámbulo para eliminar la página en blanco inicial.
+\AtBeginDocument{\renewcommand{\refname}{\MakeUppercase{Referencias}}}
+    
+\begin{document}
+\title{Especificación Formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa}
+
+\author{
+    \IEEEauthorblockN{
+        Jhordan Huamaní Huamaní\textsuperscript{1}, 
+        Jorge Ortiz Castañeda\textsuperscript{1}, 
+        José Mamani Zuñiga\textsuperscript{1}, 
+        Miguel Flores León\textsuperscript{1}
+    }
+    \IEEEauthorblockA{
+        \textsuperscript{1}Departamento de Ing. de Software, Universidad La Salle de Arequipa, Perú \\
+        \{jhordanhh, jortizc, jmamamniz, mfloresl\}@ulasalle.edu.pe
+    }
+}
+
+\AtBeginDocument{\renewcommand{\refname}{\MakeUppercase{Referencias}}}
+\maketitle
+
+\begin{abstract}
+\textit{El presente informe aborda la necesidad crítica de
+implementar un Sistema de Control de Acceso para Laboratorios
+(SICA-L) en la Universidad La Salle de Arequipa (ULASALLE)
+para proteger su nueva infraestructura y equipos de alto valor.
+La ausencia de un sistema formal y robusto representa una
+vulnerabilidad crítica ante riesgos de seguridad y falta de
+trazabilidad. El enfoque del proyecto es la especificación formal en VDM++ del SICA-L, ya que los métodos formales
+son ideales para descubrir ambigüedades y errores en etapas
+tempranas en sistemas críticos de seguridad. El modelo resultante
+servirá como un blueprint formal y sin ambigüedades que guiará
+la implementación del software y facilitará su replicación en otras
+instituciones de educación superior.}
+\end{abstract}
+
+\begin{IEEEkeywords}
+\textit{Especificación Formal, Modelos de Control de Acceso, Sistema de Control de Acceso, Invariantes, Verificación de Modelos}.
+\end{IEEEkeywords}
+
+\section{INTRODUCCIÓN}
+
+\subsection{Definición del Problema}
+
+\subsubsection{Título del Proyecto}
+Especificación Formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa (SICA-L ULASALLE).
+
+\subsubsection{Justificación}
+La Universidad La Salle de Arequipa está expandiendo su infraestructura académica, dotando a nuevos laboratorios con equipos de alto valor, tecnología de punta y materiales de investigación esenciales. En este contexto, la ausencia de un sistema de control de acceso formal y robusto desde su concepción constituye una vulnerabilidad crítica.
+
+La protección de activos de información e infraestructura física es un requisito indispensable para el funcionamiento de cualquier organización. Los métodos tradicionales, como las bitácoras manuales, son insuficientes para entornos de alto valor debido a que son propensos a errores humanos, falsificación y carecen de capacidades de auditoría en tiempo real.
+
+La falta de un sistema de control de acceso genera riesgos directos significativos:
+\begin{itemize}
+    \item \textbf{Riesgo de Seguridad:} Facilita el posible robo, daño o mal uso de equipos costosos, comprometiendo la inversión.
+    \item \textbf{Riesgo de Integridad Académica:} Permite la manipulación no autorizada de experimentos o datos de investigación.
+    \item \textbf{Riesgo de Seguridad Operacional:} El ingreso de personal no capacitado a laboratorios con materiales específicos puede derivar en accidentes.
+    \item \textbf{Falta de Trazabilidad:} Impide determinar de manera fehaciente quién se encontraba en las instalaciones durante un incidente, dificultando la rendición de cuentas.
+\end{itemize}
+
+Dado que el sistema aún no existe, la universidad tiene la oportunidad única de diseñar e implementar una solución correcta desde el principio (un desarrollo \textit{greenfield}).
+
+\subsection{Objetivos}
+
+\subsubsection{Objetivo General}
+Elaborar la especificación formal en VDM++ de un Sistema de Control de Acceso (SICA-L) para los nuevos laboratorios de la Universidad La Salle, que garantice la seguridad y la trazabilidad desde su puesta en marcha y que sirva como un modelo base escalable para otras instituciones de educación superior en la región.
+
+\subsubsection{Objetivos Específicos}
+\begin{enumerate}
+    \item Modelar formalmente las entidades clave del sistema: Usuarios, Laboratorios y los Permisos de acceso que los relacionan.
+    \item Especificar las políticas y reglas de acceso mediante un método formal para lograr precisión, tal como se requiere para una declaración precisa de las reglas que deben cumplirse.
+    \item Definir formalmente el conjunto de operaciones críticas (como la verificación de acceso y gestión de permisos) y establecer los invariantes del sistema para asegurar su consistencia lógica, garantizando que el modelo sea robusto frente a estados incoherentes.
+\end{enumerate}
+
+\section{Trabajos Relacionados o Antecedentes}
+El desarrollo de este proyecto se apoya en varios campos de la seguridad informática y la ingeniería de software:
+
+   \subsection{Sistemas de Control de Acceso Físico (PACS)} 
+    El sistema propuesto define la lógica que operará sobre diversas tecnologías de hardware, como los identificadores electrónicos que gestionan el acceso a áreas restringidas. En el contexto universitario, la implementación de un sistema de control de acceso basado en tecnología de reconocimiento facial e inteligencia artificial (IA) es un antecedente directo \cite{Qin2022Face}, ya que permite la gestión inteligente de laboratorios, combinando IA y reconocimiento facial para el control de acceso. Este método es considerado más seguro e higiénico en comparación con la identificación por huella dactilar o contraseña.
+    \item \textbf{Modelos de Control de Acceso basados en Roles (RBAC) y Atributos (ABAC) con Dimensiones Temporales:} Los roles o permisos de acceso suelen tener una duración temporal o periódica. El modelo Temporal-RBAC (TRBAC) es un antecedente relevante \cite{Bertino2001TRBAC, Bertino1999Temporal}, ya que extiende RBAC para soportar la habilitación y deshabilitación periódica de roles y dependencias temporales entre acciones. Las autorizaciones temporales periódicas pueden especificar permisos válidos solo para intervalos específicos, como horarios de 9 a.m. a 1 p.m. en días laborables.
+    \item \textbf{Métodos Formales (VDM++):} El uso de VDM++ es crucial \cite{Bryans2007VDM}, ya que permite descubrir ambigüedades y errores en las especificaciones de requisitos en una etapa temprana del ciclo de vida del desarrollo, lo cual es fundamental para sistemas críticos de seguridad. VDM++ proporciona un lenguaje de especificación orientado a objetos con un sólido soporte de herramientas (VDMTools) que permite crear un modelo semántico y ejecutable de las políticas de control de acceso. Esto facilita el análisis y la validación del modelo mediante pruebas (testing).
+    \item \textbf{Especificación Formal de Políticas (XACML):} Un antecedente metodológico es la formalización de políticas de control de acceso como XACML (eXtensible Access Control Markup Language) en VDM++ \cite{Bryans2007VDM}. XACML permite describir políticas sensibles al contexto (context-sensitive), donde la decisión de acceso depende de variables dinámicas del entorno.
+    \item \textbf{Verificación de Políticas de Control de Acceso:} La verificación rigurosa de las políticas es un antecedente esencial para garantizar la seguridad. Para los modelos de Control de Acceso Basado en Atributos (ABAC) \cite{NISTSP800-162}, la verificación de la conformidad del modelo con las políticas y requisitos de seguridad (como la integridad y la cobertura) es crucial para detectar inconsistencias, reglas faltantes o fallas de seguridad como la fuga de privilegios o el bloqueo de acceso autorizado \cite{NISTSP800-192}.
+\end{enumerate}
+
+\section{Requerimientos Funcionales (Máximo 5)}
+El sistema de control de acceso SICA-L debe satisfacer los siguientes requisitos funcionales:
+\begin{description}
+    \item \textbf{RF1: Gestión de Usuarios:} El sistema debe permitir a un administrador registrar, modificar y dar de baja a los usuarios. Cada usuario debe tener un identificador único institucional, nombre completo y un rol definido.
+    \item \textbf{RF2: Gestión de Autorizaciones:} El sistema debe permitir a un administrador asignar y revocar el permiso de acceso de un usuario a uno o más laboratorios específicos.
+    \item \textbf{RF3: Verificación de Acceso:} El sistema debe proveer una operación para procesar una solicitud de acceso, verificando la identidad del usuario y su autorización vigente para el laboratorio en cuestión.
+    \item \textbf{RF4: Registro de Eventos (Bitácora):} El sistema debe registrar de forma inmutable cada intento de acceso. Este registro de auditoría (\textit{audit trail}) es esencial para la seguridad, ya que proporciona los medios para detectar y analizar las violaciones de la política. La bitácora debe almacenar ID de usuario, laboratorio, fecha, hora y resultado.
+    \item \textbf{RF5: Registro de Ingreso y Salida:} Tras un acceso aprobado, el sistema debe registrar formalmente el ingreso de un usuario al laboratorio. Debe existir una operación complementaria para registrar su salida.
+\end{description}
+
+\section{Metodología y Desarrollo}
+La metodología de desarrollo se centrará en la Especificación Formal (VDM++) para asegurar la corrección y robustez del modelo de acceso antes de su implementación.
+\begin{enumerate}
+    \item \textbf{Modelado de Entidades y Tipos de Datos:} El primer paso es la traducción de los conceptos del mundo real a un modelo matemático, aprovechando la separación de tipos de datos y funcionalidad de VDM++. Se definirán las clases (\textit{clases}) y variables de instancia (\textit{instance variables}) para las entidades clave (Usuarios, Laboratorios, Permisos, Roles). Se utilizarán tipos abstractos como mapas, conjuntos y registros para describir el estado local del sistema.
+    \item \textbf{Definición de Invariantes y Operaciones Críticas:} Se definirán formalmente las operaciones que rigen el sistema (RF1, RF2, RF3, RF5) mediante precondiciones y postcondiciones. Los invariantes del sistema se establecerán para asegurar la consistencia lógica, garantizando que el modelo no pueda alcanzar un estado incoherente tras la ejecución de las operaciones.
+    \item \textbf{Especificación de Políticas de Control de Acceso:} Las reglas de acceso se especificarán utilizando un lenguaje de lógica formal, similar a la estructura de reglas de XACML, donde las decisiones de acceso pueden depender de atributos del sujeto, el objeto y las condiciones ambientales (tiempo, rol, etc.). Esto se modela mediante expresiones lógicas (\textit{FExp} en VDM++) que se evalúan en función del entorno dinámico.
+    \item \textbf{Verificación y Validación del Modelo:} El modelo formal se someterá a validación mediante la ejecución directa en el intérprete de VDMTools. Se aplicarán pruebas (\textit{testing}) utilizando peticiones de acceso (\textit{requests}) simuladas para obtener retroalimentación rápida sobre el comportamiento de la política. Para problemas más complejos (como la verificación de la lógica de las reglas ABAC), pueden emplearse métodos de \textit{pseudo-exhaustive testing} que utilizan técnicas combinatorias (como ACTS) para generar conjuntos de pruebas eficientes que aseguren la cobertura de las interacciones de atributos y condiciones, reduciendo el tamaño del conjunto de pruebas a un nivel manejable. Esto es crucial para detectar fallos semánticos como reglas conflictivas o incompletas.
+\end{enumerate}
+
+\section{Resultados y Discusión}
+El resultado principal del proyecto es la generación de un modelo de especificación formal y ejecutable en VDM++.
+
+\subsection{Discusión sobre Seguridad y Precisión Formal}
+La aplicación de métodos formales garantiza que la política de acceso será una declaración precisa de las reglas que deben cumplirse. La especificación formal permite identificar discrepancias entre los requisitos de alto nivel y la implementación deseada, previniendo vulnerabilidades serias en el mecanismo de control de acceso.
+
+La especificación del SICA-L debe apuntar a la seguridad del sistema, la trazabilidad y la resistencia a ataques comunes. Dado que el sistema requiere una autenticación previa para el control de acceso (RF3), la elección de la tecnología de autenticación es relevante. Tecnologías como ECC (\textit{Elliptic Curve Cryptography}) basadas en RFID son antecedentes sólidos en entornos de IoT de alta sensibilidad (como la atención médica) \cite{Noori2022ECC}, ofreciendo costos computacionales y de comunicación más bajos y resistencia probada contra ataques de \textit{Man-in-the-Middle}, \textit{Replay attack} y ataques de falsificación (\textit{forging attack}). Implementar un protocolo de autenticación mutua (donde la tarjeta autentica al lector y viceversa) es una característica de seguridad clave que resiste ataques de Denegación de Servicio (DoS).
+
+\subsection{Discusión sobre la Complejidad del Diseño}
+Aunque el uso de métodos formales garantiza precisión y coherencia lógica (a través de invariantes), un modelo de control de acceso preciso puede ser inherentemente complejo. Los modelos detallados de control de acceso que involucran atributos o roles temporales (como TRBAC) pueden llevar a especificaciones que, si no se verifican, pueden ser ambiguas o inconsistentes. El proceso de verificación del modelo se vuelve tan crucial como la modelización misma, enfocándose en la verificación de la integridad, la cobertura y la ausencia de fallas como la fuga de privilegios (\textit{privilege leakage}) o el bloqueo de privilegios (\textit{privilege blocking}).
+
+\section{Conclusiones}
+La especificación formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa (SICA-L) es una respuesta necesaria y proactiva a la vulnerabilidad de la nueva infraestructura ante la falta de un mecanismo robusto y auditable. El proyecto busca elaborar un modelo en VDM++ que defina con precisión las entidades, las operaciones críticas, y las reglas de acceso, asegurando la consistencia lógica mediante la formulación de invariantes. La metodología, basada en la ejecutabilidad de VDM++ y las técnicas de verificación de modelos (como las pruebas combinatorias y el \textit{model checking}), asegura que el \textit{blueprint} resultante está libre de las ambigüedades y fallos que son comunes en las especificaciones de requisitos de seguridad tradicionales.
+
+Al establecer un modelo base escalable para ULASALLE y potencialmente para otras instituciones de educación superior, el proyecto contribuye a elevar el estándar de la seguridad física y la trazabilidad en entornos académicos de alto valor.
+
+\bibliographystyle{IEEEtran}
+\bibliography{referencias}
+
+\end{document}
