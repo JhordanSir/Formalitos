@@ -1,0 +1,165 @@
+Initializing specification ... done
+>> tcov reset
+>> create s := new SistemaControlAcceso()
+>> create u1 := new Usuario(1, "Alice", <ADMIN>)
+>> create u2 := new Usuario(2, "Bob", <DOCENTE>)
+>> create u3 := new Usuario(3, "Charlie", <ESTUDIANTE>)
+>> create l1 := new Laboratorio(1, "Lab A", "Building 1")
+>> create l2 := new Laboratorio(2, "Lab B", "Building 2")
+>> create l3 := new Laboratorio(3, "Lab C", "Building 3")
+>> print s.RegistrarUsuario(u1)
+true
+>> print s.RegistrarUsuario(u2)
+true
+>> print s.RegistrarUsuario(u3)
+true
+>> print s.RegistrarUsuario(u1)
+false
+>> print s.RegistrarLaboratorio(l1)
+true
+>> print s.RegistrarLaboratorio(l2)
+true
+>> print s.RegistrarLaboratorio(l3)
+true
+>> print s.RegistrarLaboratorio(l1)
+false
+>> print s.ModificarUsuario(1, "Alice Modificada", <ADMIN>)
+true
+>> print s.ModificarUsuario(99, "Ghost", <DOCENTE>)
+false
+>> print s.DarBajaUsuario(3)
+true
+>> print s.DarBajaUsuario(77)
+false
+>> print s.AsignarPermiso(2, 1)
+true
+>> print s.DarBajaUsuario(2)
+true
+>> print s.ModificarLaboratorio(1, "Lab Redes", "Pabellón B")
+true
+>> print s.ModificarLaboratorio(88, "Fake Lab", "Nowhere")
+false
+>> print s.DarBajaLaboratorio(3)
+true
+>> print s.DarBajaLaboratorio(33)
+false
+>> print s.AsignarPermiso(1, 2)
+true
+>> print s.DarBajaLaboratorio(2)
+true
+>> print s.AsignarPermiso(1, 1)
+true
+>> print s.AsignarPermiso(99, 1)
+false
+>> print s.AsignarPermiso(1, 99)
+false
+>> print s.RevocarPermiso(1, 1)
+true
+>> print s.RevocarPermiso(1, 5)
+false
+>> print s.RevocarPermiso(99, 1)
+false
+>> print s.VerificarAcceso(1, 1)
+false
+>> print s.VerificarAcceso(1, 2)
+false
+>> print s.RegistrarIntentoAcceso(1, 1, true)
+true
+>> print s.RegistrarIntentoAcceso(1, 1, false)
+true
+>> print s.RegistrarIntentoAcceso(99, 1, true)
+false
+>> print s.RegistrarIntentoAcceso(1, 99, false)
+false
+>> print s.AsignarPermiso(1, 1)
+true
+>> print s.RegistrarIngreso(1, 1)
+true
+>> print s.RegistrarIngreso(2, 1)
+false
+>> print s.RegistrarSalida(1, 1)
+true
+>> print s.RegistrarSalida(99, 1)
+false
+>> print s.RegistrarSalida(1, 99)
+false
+>> print s.HistorialLaboratorio(1, {<INTENTO_ACCESO>, <INGRESO>, <SALIDA>})
+[ objref17(Evento):
+    <  + Evento`tipo = <SALIDA>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = true,
+       + Evento`laboratorio = 1 >,
+  objref16(Evento):
+    <  + Evento`tipo = <INGRESO>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = true,
+       + Evento`laboratorio = 1 >,
+  objref15(Evento):
+    <  + Evento`tipo = <INTENTO_ACCESO>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = false,
+       + Evento`laboratorio = 1 >,
+  objref14(Evento):
+    <  + Evento`tipo = <INTENTO_ACCESO>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = true,
+       + Evento`laboratorio = 1 > ]
+>> print s.HistorialLaboratorio(2, {<INTENTO_ACCESO>})
+[  ]
+>> print s.HistorialUsuario(1, {<INTENTO_ACCESO>, <INGRESO>, <SALIDA>})
+[ objref17(Evento):
+    <  + Evento`tipo = <SALIDA>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = true,
+       + Evento`laboratorio = 1 >,
+  objref16(Evento):
+    <  + Evento`tipo = <INGRESO>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = true,
+       + Evento`laboratorio = 1 >,
+  objref15(Evento):
+    <  + Evento`tipo = <INTENTO_ACCESO>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = false,
+       + Evento`laboratorio = 1 >,
+  objref14(Evento):
+    <  + Evento`tipo = <INTENTO_ACCESO>,
+       + Evento`usuario = 1,
+       + Evento`fechaHora = "2025-10-21 00:00",
+       + Evento`resultado = true,
+       + Evento`laboratorio = 1 > ]
+>> print s.HistorialUsuario(99, {<INGRESO>})
+[  ]
+>> tcov write vdm.tc
+>> rtinfo vdm.tc
+  100%      4  Evento`Evento
+  100%  Evento
+  100%      4  Usuario`Usuario
+  100%  Usuario
+  100%      4  Laboratorio`Laboratorio
+  100%  Laboratorio
+  100%      6  SistemaControlAcceso`AsignarPermiso
+  100%      3  SistemaControlAcceso`DarBajaUsuario
+  100%      3  SistemaControlAcceso`RevocarPermiso
+  100%      3  SistemaControlAcceso`RegistrarSalida
+  100%      4  SistemaControlAcceso`VerificarAcceso
+  100%      2  SistemaControlAcceso`HistorialUsuario
+  100%      2  SistemaControlAcceso`ModificarUsuario
+  100%      2  SistemaControlAcceso`RegistrarIngreso
+  100%      4  SistemaControlAcceso`RegistrarUsuario
+  100%      3  SistemaControlAcceso`DarBajaLaboratorio
+  100%      2  SistemaControlAcceso`HistorialLaboratorio
+  100%      2  SistemaControlAcceso`ModificarLaboratorio
+  100%      4  SistemaControlAcceso`RegistrarLaboratorio
+  100%      4  SistemaControlAcceso`RegistrarIntentoAcceso
+  100%  SistemaControlAcceso
+
+Total Coverage: 100%
+
