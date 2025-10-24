@@ -148,46 +148,47 @@ operations
     return (uid in set dom permisos and lid in set permisos(uid));
   );
 
-  public RegistrarIntentoAcceso : nat1 * nat1 * bool ==> bool
-  RegistrarIntentoAcceso(uid, lid, resultado) ==
+  public RegistrarIntentoAcceso : nat1 * nat1 * seq of char * bool ==> bool
+  RegistrarIntentoAcceso(uid, lid, fechaHora, resultado) ==
   (
     if uid not in set {u.id | u in set usuarios} or
-       lid not in set {l.id | l in set laboratorios} then
+      lid not in set {l.id | l in set laboratorios} then
       return false
     else
     (
-      dcl e : Evento := new Evento(uid, lid, "2025-10-21 00:00", <INTENTO_ACCESO>, resultado);
-      bitacora := bitacora ^ [e];
-      return true;
-    )
-  );
-
-  public RegistrarIngreso : nat1 * nat1 ==> bool
-  RegistrarIngreso(uid, lid) ==
-  (
-    if not VerificarAcceso(uid, lid) then
-      return false
-    else
-    (
-      dcl e : Evento := new Evento(uid, lid, "2025-10-21 00:00", <INGRESO>, true);
+      dcl e : Evento := new Evento(uid, lid, fechaHora, <INTENTO_ACCESO>, resultado);
       bitacora := bitacora ^ [e];
       return true
     )
   );
 
-  public RegistrarSalida : nat1 * nat1 ==> bool
-  RegistrarSalida(uid, lid) ==
+  public RegistrarIngreso : nat1 * nat1 * seq of char ==> bool
+  RegistrarIngreso(uid, lid, fechaHora) ==
   (
-    if uid not in set {u.id | u in set usuarios} or
-       lid not in set {l.id | l in set laboratorios} then
+    if not VerificarAcceso(uid, lid) then
       return false
     else
     (
-      dcl e : Evento := new Evento(uid, lid, "2025-10-21 00:00", <SALIDA>, true);
+      dcl e : Evento := new Evento(uid, lid, fechaHora, <INGRESO>, true);
       bitacora := bitacora ^ [e];
-      return true;
+      return true
     )
   );
+
+  public RegistrarSalida : nat1 * nat1 * seq of char ==> bool
+  RegistrarSalida(uid, lid, fechaHora) ==
+  (
+    if uid not in set {u.id | u in set usuarios} or
+      lid not in set {l.id | l in set laboratorios} then
+      return false
+    else
+    (
+      dcl e : Evento := new Evento(uid, lid, fechaHora, <SALIDA>, true);
+      bitacora := bitacora ^ [e];
+      return true
+    )
+  );
+
 
   public HistorialLaboratorio : nat1 * set of (<INTENTO_ACCESO> | <INGRESO> | <SALIDA>) ==> seq of Evento
   HistorialLaboratorio(lid, tipos) ==
