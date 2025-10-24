@@ -141,6 +141,14 @@ La metodología de desarrollo se centrará en la Especificación Formal (VDM++) 
 \section{Resultados y Discusión}
 El resultado principal del proyecto es la generación de un modelo de especificación formal y ejecutable en VDM++.
 
+\begin{figure}[ht]
+\centering 
+\includegraphics[width=0.8\columnwidth]{ClaseSistemaParte1.png} 
+\caption{Especificación de la Clase Sistema Parte 1 en VDM++. (Fuente: Archivo SistemaControlAcceso.vdmpp)}
+\label{fig:clase_sistema_parte_1}
+\end{figure}
+
+
 \subsection{Discusión sobre Seguridad y Precisión Formal}
 La aplicación de métodos formales garantiza que la política de acceso será una declaración precisa de las reglas que deben cumplirse. La especificación formal permite identificar discrepancias entre los requisitos de alto nivel y la implementación deseada, previniendo vulnerabilidades serias en el mecanismo de control de acceso.
 
@@ -169,6 +177,7 @@ Aunque el uso de métodos formales garantiza precisión y coherencia lógica (a 
 \caption{Especificación de la Clase Usuario en VDM++. (Fuente: Archivo Usuario.vdmpp)}
 \label{fig:clase_usuario}
 \end{figure}
+
 
 \section{Conclusiones}
 La especificación formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa (SICA-L) es una respuesta necesaria y proactiva a la vulnerabilidad de la nueva infraestructura ante la falta de un mecanismo robusto y auditable. El proyecto busca elaborar un modelo en VDM++ que defina con precisión las entidades, las operaciones críticas, y las reglas de acceso, asegurando la consistencia lógica mediante la formulación de invariantes. La metodología, basada en la ejecutabilidad de VDM++ y las técnicas de verificación de modelos (como las pruebas combinatorias y el \textit{model checking}), asegura que el \textit{blueprint} resultante está libre de las ambigüedades y fallos que son comunes en las especificaciones de requisitos de seguridad tradicionales.
