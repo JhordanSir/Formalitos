@@ -1,0 +1,212 @@
+class SistemaControlAcceso
+
+types
+  public Rol = <ADMIN> | <DOCENTE> | <ESTUDIANTE> | <INVESTIGADOR>;
+
+instance variables
+  usuarios : set of Usuario := {};
+  laboratorios : set of Laboratorio := {};
+  permisos : map nat1 to set of nat1 := {|->};
+  bitacora : seq of Evento := [];
+
+inv
+  card usuarios = card {u.id | u in set usuarios};
+inv
+  card laboratorios = card {l.id | l in set laboratorios};
+inv
+  forall uid in set dom permisos &
+    uid in set {u.id | u in set usuarios} and
+    forall lid in set permisos(uid) &
+      lid in set {l.id | l in set laboratorios};
+inv
+  forall e in set elems bitacora &
+    e.usuario in set {u.id | u in set usuarios} and
+    e.laboratorio in set {l.id | l in set laboratorios};
+inv
+  dom permisos subset {u.id | u in set usuarios};
+
+operations
+
+  public RegistrarUsuario : Usuario ==> bool
+  RegistrarUsuario(u) ==
+  (
+    if u.id in set {x.id | x in set usuarios} then
+      return false
+    else
+    (
+      usuarios := usuarios union {u};
+      return true;
+    )
+  );
+
+  public ModificarUsuario : nat1 * seq of char * Rol ==> bool
+  ModificarUsuario(uid, nombre, rol) ==
+  (
+    dcl uSet : set of Usuario := {x | x in set usuarios & x.id = uid};
+    if card uSet = 0 then
+      return false
+    else
+    (
+      let u in set uSet in
+        usuarios := (usuarios \ {u}) union
+                    {new Usuario(uid, nombre, rol)};
+      return true
+    )
+  );
+
+  public DarBajaUsuario : nat1 ==> bool
+  DarBajaUsuario(uid) ==
+  (
+    dcl existentes : set of Usuario := {u | u in set usuarios & u.id = uid};
+    if card existentes = 0 then
+      return false
+    else
+    (
+      usuarios := usuarios \ existentes;
+      if uid in set dom permisos then
+        permisos := {uid} <-: permisos;
+      return true
+    )
+  );
+
+  public RegistrarLaboratorio : Laboratorio ==> bool
+  RegistrarLaboratorio(l) ==
+  (
+    if l.id in set {x.id | x in set laboratorios} then
+      return false
+    else
+    (
+      laboratorios := laboratorios union {l};
+      return true;
+    )
+  );
+
+  public ModificarLaboratorio : nat1 * seq of char * seq of char ==> bool
+  ModificarLaboratorio(lid, nombre, ubicacion) ==
+  (
+    dcl lSet : set of Laboratorio := {x | x in set laboratorios & x.id = lid};
+    if card lSet = 0 then
+      return false
+    else
+    (
+      let l in set lSet in
+        laboratorios := (laboratorios \ {l}) union
+                        {new Laboratorio(lid, nombre, ubicacion)};
+      return true
+    )
+  );
+
+  public DarBajaLaboratorio : nat1 ==> bool
+  DarBajaLaboratorio(lid) ==
+  (
+    dcl existentes : set of Laboratorio := {l | l in set laboratorios & l.id = lid};
+    if card existentes = 0 then
+      return false
+    else
+    (
+      laboratorios := laboratorios \ existentes;
+      for all uid in set dom permisos do
+        permisos(uid) := permisos(uid) \ {lid};
+      return true;
+    )
+  );
+
+  public AsignarPermiso : nat1 * nat1 ==> bool
+  AsignarPermiso(uid, lid) ==
+  (
+    if not (uid in set {u.id | u in set usuarios}) then
+      return false
+    elseif not (lid in set {l.id | l in set laboratorios}) then
+      return false
+    else
+    (
+      if uid in set dom permisos then
+        permisos(uid) := permisos(uid) union {lid}
+      else
+        permisos := permisos ++ {uid |-> {lid}};
+      return true;
+    )
+  );
+
+  public RevocarPermiso : nat1 * nat1 ==> bool
+  RevocarPermiso(uid, lid) ==
+  (
+    if uid not in set dom permisos then
+      return false
+    elseif lid not in set permisos(uid) then
+      return false
+    else
+    (
+      permisos(uid) := permisos(uid) \ {lid};
+      return true;
+    )
+  );
+
+  public VerificarAcceso : nat1 * nat1 ==> bool
+  VerificarAcceso(uid, lid) ==
+  (
+    return (uid in set dom permisos and lid in set permisos(uid));
+  );
+
+  public RegistrarIntentoAcceso : nat1 * nat1 * bool ==> bool
+  RegistrarIntentoAcceso(uid, lid, resultado) ==
+  (
+    if uid not in set {u.id | u in set usuarios} or
+       lid not in set {l.id | l in set laboratorios} then
+      return false
+    else
+    (
+      dcl e : Evento := new Evento(uid, lid, "2025-10-21 00:00", <INTENTO_ACCESO>, resultado);
+      bitacora := bitacora ^ [e];
+      return true;
+    )
+  );
+
+  public RegistrarIngreso : nat1 * nat1 ==> bool
+  RegistrarIngreso(uid, lid) ==
+  (
+    if not VerificarAcceso(uid, lid) then
+      return false
+    else
+    (
+      dcl e : Evento := new Evento(uid, lid, "2025-10-21 00:00", <INGRESO>, true);
+      bitacora := bitacora ^ [e];
+      return true
+    )
+  );
+
+  public RegistrarSalida : nat1 * nat1 ==> bool
+  RegistrarSalida(uid, lid) ==
+  (
+    if uid not in set {u.id | u in set usuarios} or
+       lid not in set {l.id | l in set laboratorios} then
+      return false
+    else
+    (
+      dcl e : Evento := new Evento(uid, lid, "2025-10-21 00:00", <SALIDA>, true);
+      bitacora := bitacora ^ [e];
+      return true;
+    )
+  );
+
+  public HistorialLaboratorio : nat1 * set of (<INTENTO_ACCESO> | <INGRESO> | <SALIDA>) ==> seq of Evento
+  HistorialLaboratorio(lid, tipos) ==
+  (
+    dcl filtrado : seq of Evento := [];
+    for all e in set elems bitacora do
+      if e.laboratorio = lid and e.tipo in set tipos then
+        filtrado := filtrado ^ [e];
+    return filtrado
+  );
+
+  public HistorialUsuario : nat1 * set of (<INTENTO_ACCESO> | <INGRESO> | <SALIDA>) ==> seq of Evento
+  HistorialUsuario(uid, tipos) ==
+  (
+    dcl filtrado : seq of Evento := [];
+    for all e in set elems bitacora do
+      if e.usuario = uid and e.tipo in set tipos then
+        filtrado := filtrado ^ [e];
+    return filtrado
+  );
+
+end SistemaControlAcceso

@@ -1,0 +1,22 @@
+class Usuario
+types
+  public Rol = <ADMIN> | <DOCENTE> | <ESTUDIANTE> | <INVESTIGADOR>;
+instance variables
+  public id : nat1;
+  public nombre : seq of char;
+  public rol : Rol;
+
+inv id > 0;
+inv len nombre > 0;
+
+operations
+  public Usuario : nat1 * seq of char * Rol ==> Usuario
+  Usuario(i, n, r) ==
+  (
+    id := i;
+    nombre := n;
+    rol := r;
+    return self;
+  );
+
+end Usuario

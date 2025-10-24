@@ -1,0 +1,26 @@
+class Evento
+
+instance variables
+  public usuario : nat1;
+  public laboratorio : nat1;
+  public fechaHora : seq of char;
+  public tipo : <INTENTO_ACCESO> | <INGRESO> | <SALIDA>;
+  public resultado : bool;
+
+inv usuario > 0;
+inv laboratorio > 0;
+inv len fechaHora > 0;
+
+operations
+  public Evento : nat1 * nat1 * seq of char * (<INTENTO_ACCESO> | <INGRESO> | <SALIDA>) * bool ==> Evento
+  Evento(u, l, f, t, r) ==
+  (
+    usuario := u;
+    laboratorio := l;
+    fechaHora := f;
+    tipo := t;
+    resultado := r;
+    return self;
+  );
+
+end Evento

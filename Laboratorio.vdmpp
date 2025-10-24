@@ -1,0 +1,22 @@
+class Laboratorio
+
+instance variables
+  public id : nat1;
+  public nombre : seq of char;
+  public ubicacion : seq of char;
+
+inv id > 0;
+inv len nombre > 0;
+inv len ubicacion > 0;
+
+operations
+  public Laboratorio : nat1 * seq of char * seq of char ==> Laboratorio
+  Laboratorio(i, n, u) ==
+  (
+    id := i;
+    nombre := n;
+    ubicacion := u;
+    return self;
+  );
+
+end Laboratorio
