@@ -1,0 +1,181 @@
+MODULE main
+CONSTANTS
+  -- usuarios
+  u1 := 1;  u2 := 2;  u3 := 3;
+  -- laboratorios
+  l1 := 1;  l2 := 2;
+  -- tipos de evento
+  intento := 0;
+  ingreso := 1;
+  salida  := 2;
+  ninguno := 3;
+  fuera := 0;
+  dentro := 1;
+VAR
+  -- usuario activo en esta transición
+  uid : {u1, u2, u3};
+  -- laboratorio activo en esta transición
+  lid : {l1, l2};
+  -- acción: intento, ingreso, salida o ninguna
+  accion : {intento, ingreso, salida, ninguno};
+  -- resultado del intento
+  resultado : boolean;
+  -----------------------------------------------------------------
+  -- PERMISOS U-L : matriz booleana
+  permiso_u1_l1 : boolean;
+  permiso_u1_l2 : boolean;
+  permiso_u2_l1 : boolean;
+  permiso_u2_l2 : boolean;
+  permiso_u3_l1 : boolean;
+  permiso_u3_l2 : boolean;
+  -----------------------------------------------------------------
+  -- ESTADO DE OCUPACIÓN: si un usuario está dentro de un laboratorio
+  estado_u1_l1 : {fuera, dentro};
+  estado_u1_l2 : {fuera, dentro};
+  estado_u2_l1 : {fuera, dentro};
+  estado_u2_l2 : {fuera, dentro};
+  estado_u3_l1 : {fuera, dentro};
+  estado_u3_l2 : {fuera, dentro};
+  -----------------------------------------------------------------
+  -- Último evento registrado (representa la bitácora)
+  last_uid : {u1, u2, u3};
+  last_lid : {l1, l2};
+  last_tipo : {intento, ingreso, salida, ninguno};
+  last_resultado : boolean;
+-------------------------------------------------------------------
+-- ESTADO INICIAL
+INIT
+  accion = ninguno &
+  resultado = FALSE &
+  !permiso_u1_l1 & !permiso_u1_l2 &
+  !permiso_u2_l1 & !permiso_u2_l2 &
+  !permiso_u3_l1 & !permiso_u3_l2 &
+  estado_u1_l1 = fuera &
+  estado_u1_l2 = fuera &
+  estado_u2_l1 = fuera &
+  estado_u2_l2 = fuera &
+  estado_u3_l1 = fuera &
+  estado_u3_l2 = fuera &
+  last_tipo = ninguno
+-------------------------------------------------------------------
+-- TRANSICIONES
+ASSIGN
+  -----------------------------------------------------------------
+  -- Cambios arbitrarios de usuario, laboratorio y acción
+  next(uid) := {u1, u2, u3};
+  next(lid) := {l1, l2};
+  next(accion) := {ninguno, intento, ingreso, salida};
+  -----------------------------------------------------------------
+  -- RESULTADO DEL INTENTO: válido solo si tiene permiso
+  next(resultado) :=
+    case
+      next(accion) = intento :
+        case
+          next(uid) = u1 & next(lid) = l1 : permiso_u1_l1;
+          next(uid) = u1 & next(lid) = l2 : permiso_u1_l2;
+          next(uid) = u2 & next(lid) = l1 : permiso_u2_l1;
+          next(uid) = u2 & next(lid) = l2 : permiso_u2_l2;
+          next(uid) = u3 & next(lid) = l1 : permiso_u3_l1;
+          next(uid) = u3 & next(lid) = l2 : permiso_u3_l2;
+          TRUE : FALSE;
+        esac;
+      TRUE : resultado;
+    esac;
+  -----------------------------------------------------------------
+  -- REGISTRO DEL ÚLTIMO EVENTO EN LA BITÁCORA
+  next(last_uid) := next(uid);
+  next(last_lid) := next(lid);
+  next(last_tipo) := next(accion);
+  next(last_resultado) := next(resultado);
+  -----------------------------------------------------------------
+  -- TRANSICIONES DE INGRESO Y SALIDA
+  -- USUARIO 1, LAB 1
+  next(estado_u1_l1) :=
+    case
+      next(accion) = ingreso &
+      next(uid) = u1 & next(lid) = l1 &
+      permiso_u1_l1 : dentro;
+      next(accion) = salida &
+      next(uid) = u1 & next(lid) = l1 : fuera;
+      TRUE : estado_u1_l1;
+    esac;
+  -- USUARIO 1, LAB 2
+  next(estado_u1_l2) :=
+    case
+      next(accion) = ingreso &
+      next(uid) = u1 & next(lid) = l2 &
+      permiso_u1_l2 : dentro;
+      next(accion) = salida &
+      next(uid) = u1 & next(lid) = l2 : fuera;
+      TRUE : estado_u1_l2;
+    esac;
+  next(estado_u2_l1) :=
+    case
+      next(accion) = ingreso &
+      next(uid) = u2 & next(lid) = l1 &
+      permiso_u2_l1 : dentro;
+      next(accion) = salida &
+      next(uid) = u2 & next(lid) = l1 : fuera;
+      TRUE : estado_u2_l1;
+    esac;
+  next(estado_u2_l2) :=
+    case
+      next(accion) = ingreso &
+      next(uid) = u2 & next(lid) = l2 &
+      permiso_u2_l2 : dentro;
+      next(accion) = salida &
+      next(uid) = u2 & next(lid) = l2 : fuera;
+      TRUE : estado_u2_l2;
+    esac;
+  next(estado_u3_l1) :=
+    case
+      next(accion) = ingreso &
+      next(uid) = u3 & next(lid) = l1 &
+      permiso_u3_l1 : dentro;
+      next(accion) = salida &
+      next(uid) = u3 & next(lid) = l1 : fuera;
+      TRUE : estado_u3_l1;
+    esac;
+  next(estado_u3_l2) :=
+    case
+      next(accion) = ingreso &
+      next(uid) = u3 & next(lid) = l2 &
+      permiso_u3_l2 : dentro;
+      next(accion) = salida &
+      next(uid) = u3 & next(lid) = l2 : fuera;
+      TRUE : estado_u3_l2;
+    esac;
+-------------------------------------------------------------------
+--  PROPIEDADES A VERIFICAR EN NuSMV
+-- 1. No debe haber INGRESO sin permiso
+SPEC AG(
+  accion = ingreso ->
+    (
+      (uid = u1 & lid = l1 -> permiso_u1_l1) &
+      (uid = u1 & lid = l2 -> permiso_u1_l2) &
+      (uid = u2 & lid = l1 -> permiso_u2_l1) &
+      (uid = u2 & lid = l2 -> permiso_u2_l2) &
+      (uid = u3 & lid = l1 -> permiso_u3_l1) &
+      (uid = u3 & lid = l2 -> permiso_u3_l2)
+    )
+)
+-- 2. No puede haber SALIDA si el usuario estaba fuera
+SPEC AG(
+  accion = salida ->
+    (
+      (uid = u1 & lid = l1 -> estado_u1_l1 = dentro) &
+      (uid = u1 & lid = l2 -> estado_u1_l2 = dentro) &
+      (uid = u2 & lid = l1 -> estado_u2_l1 = dentro) &
+      (uid = u2 & lid = l2 -> estado_u2_l2 = dentro) &
+      (uid = u3 & lid = l1 -> estado_u3_l1 = dentro) &
+      (uid = u3 & lid = l2 -> estado_u3_l2 = dentro)
+    )
+)
+-- 3. Todo INGRESO exige un intento previo exitoso
+SPEC AG(
+  accion = ingreso -> resultado = TRUE
+)
+-- 4. No se pueden hacer 2 ingresos consecutivos sin salida
+SPEC AG(
+  (estado_u1_l1 = dentro) -> AX( accion != ingreso )
+)
