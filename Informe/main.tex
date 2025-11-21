@@ -1,10 +1,18 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
-
-% ----------------------------------------
-%              PAQUETES
-% ----------------------------------------
-\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{array}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{textcomp}
+\usepackage{stfloats}
+\usepackage{url}
+\usepackage{verbatim}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{cite}
+\usepackage{xcolor}
 \usepackage{cite}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
@@ -15,7 +23,12 @@
 \usepackage{enumitem}
 \usepackage{subcaption}
 \usepackage{listings}
-\usepackage{xcolor}
+\hyphenation{op-tical net-works semi-conduc-tor IEEE-Xplore}
+% updated with editorial comments 8/9/2021
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0},
+}
 
 \lstdefinestyle{codigo}{
     backgroundcolor=\color{gray!10},
@@ -29,37 +42,47 @@
     stringstyle=\color{orange!80!black},
     showstringspaces=false
 }
+% Headers con fancyhdr
+\usepackage{fancyhdr}
 
-% ----------------------------------------
-%    CONFIGURACIÓN DE HYPERREF
-% ----------------------------------------
-\hypersetup{
-    colorlinks=true,
-    urlcolor=blue,
-    linkcolor=black,
-    citecolor=black
+% --- Estilo general ---
+\fancypagestyle{otherpages}{%
+  \fancyhf{}
+  \fancyhead[C]{\textbf{Universidad La Salle - Inspira La Salle 2025}}
+  \fancyhead[R]{\thepage}
+  \renewcommand{\headrulewidth}{0.4pt}
 }
 
-% ----------------------------------------
-%     CORRECCIONES DE FORMATO IEEE
-% ----------------------------------------
-
-% Corrige el nombre de la sección de palabras clave ("Keywords" en lugar de "Index Terms")
-\makeatletter
-\def\@IEEEkeywordsname{Keywords}
-\makeatother
-
-% Cambiar "References" por "REFERENCIAS"
-\AtBeginDocument{\renewcommand{\refname}{\MakeUppercase{Referencias}}}
-
-% Comando para BibTeX
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
-    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-
-% ----------------------------------------
 \begin{document}
 
-\title{Especificación Formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa}
+% Aplica estilo
+\pagestyle{otherpages}
+% =========================================================================
+% TÍTULO DEL ARTÍCULO SEGÚN ESTÁNDAR IEEE
+% - Fuente: Times New Roman (configurada automáticamente por IEEEtran).
+% - Tamaño: 24pt en negrita (definido por IEEEtran).
+% - Estilo: Title Case (Mayúscula inicial en palabras importantes).
+% - Extensión: conciso, máximo 2 líneas.
+% - NO colocar punto final al título.
+% - Se recomienda usar \thanks{} para notas adicionales (ej: feria, evento).
+% =========================================================================
+
+\title{Especificación Formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa%
+\thanks{Presentado en la Feria de Proyectos \textit{Inspira La Salle}, Universidad La Salle, Arequipa, 2025}}
+
+% =========================================================================
+% AUTORES SEGÚN ESTÁNDAR IEEE
+% - Estructura básica:
+%   \author{Nombre Apellido, Nombre Apellido, ...\\
+%   Afiliación institucional (Universidad, Escuela, Facultad)\\
+%   Correo(s) electrónico(s)}
+%
+% - Cada autor debe tener su nombre completo (primero nombres, luego apellidos).
+% - Las afiliaciones deben ir claras y breves (ej: "Universidad La Salle, Arequipa, Perú").
+% - Los correos electrónicos se pueden listar en una sola línea o separados.
+% - El uso de \thanks{} es opcional, para agradecimientos especiales
+%   (ejemplo: financiamiento, patrocinio o mención de feria).
+% =========================================================================
 
 \author{
     \IEEEauthorblockN{
@@ -76,149 +99,612 @@
 
 \maketitle
 
-% ----------------------------------------
-%                ABSTRACT
-% ----------------------------------------
+% =========================================================================
+% ABSTRACT SEGÚN ESTÁNDAR IEEE
+% - Se coloca justo después del bloque de autores.
+% - Fuente: Times New Roman, tamaño 9pt, en un solo párrafo justificado.
+% - No debe tener sangría (IEEEtran ya lo configura automáticamente).
+% - Extensión: típicamente entre 150 y 250 palabras.
+% - Escrito en presente/tercera persona, objetivo y conciso.
+% - No se permiten referencias, citas o abreviaturas no definidas en el abstract.
+% =========================================================================
+
 \begin{abstract}
-\textit{
-El presente informe aborda la necesidad crítica de implementar un Sistema de Control de Acceso para Laboratorios (SICA-L) en la Universidad La Salle de Arequipa (ULASALLE) para proteger su nueva infraestructura y equipos de alto valor.
-La ausencia de un sistema formal y robusto representa una vulnerabilidad crítica ante riesgos de seguridad y falta de trazabilidad.
-El enfoque del proyecto es la especificación formal en VDM++ del SICA-L, ya que los métodos formales son ideales para descubrir ambigüedades y errores en etapas tempranas en sistemas críticos de seguridad.
-El modelo resultante servirá como un blueprint formal y sin ambigüedades que guiará la implementación del software y facilitará su replicación en otras instituciones de educación superior.
-}
+Este artículo presenta el desarrollo del proyecto \textit{Especificación Formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa}, realizado por estudiantes de la Universidad La Salle y expuesto en la Feria de Proyectos \textit{La Salle In-Genio} 2025. El objetivo principal es diseñar la especificación formal del sistema (SICA-L) utilizando VDM++, abordando la vulnerabilidad de los equipos de alto valor y la actual falta de trazabilidad. La propuesta consiste en validar el modelo mediante herramientas como VDM++ Toolbox y NuSMV, destacando su contribución en términos de seguridad preventiva y la generación de un diseño libre de ambigüedades. Finalmente, se discuten los resultados preliminares y el potencial de aplicación en futuras implementaciones para instituciones de educación superior.
 \end{abstract}
 
+% =========================================================================
+% IEEE KEYWORDS SEGÚN ESTÁNDAR IEEE
+% - Se colocan inmediatamente después del abstract.
+% - Fuente: Times New Roman, tamaño 9pt, en cursiva (lo maneja IEEEtran).
+% - Deben ser de 3 a 6 palabras o frases cortas, separadas por comas.
+% - No repetir palabras exactas del título, salvo que sea indispensable.
+% - Usar términos específicos que faciliten la indexación (ej: "Machine Learning"
+%   en lugar de "Algorithms").
+% - Extensión: máximo ~5–6 keywords.
+% - IEEE recomienda usar términos técnicos estandarizados (si existe un IEEE Taxonomy para tu área).
+% =========================================================================
 \begin{IEEEkeywords}
-Especificación Formal, Modelos de Control de Acceso, Sistema de Control de Acceso, Invariantes, Verificación de Modelos.
+Especificación formal, Modelos de control de acceso, Sistema de control de acceso, Verificación de modelos
 \end{IEEEkeywords}
 
-% ----------------------------------------
-\section{INTRODUCCIÓN}
+% =========================================================================
+% INTRODUCTION SEGÚN ESTÁNDAR IEEE
+% - Primera sección numerada: \section{Introduction}.
+% - Debe comenzar con \IEEEPARstart{} para dar estilo a la primera letra capital.
+% - Extensión típica: 1 a 2 páginas (para papers cortos, 2–3 párrafos).
+% - Contenido recomendado:
+%   1) Contexto general del problema o área de estudio.
+%   2) Importancia o motivación (¿por qué es relevante?).
+%   3) Limitaciones o vacíos en el estado del arte.
+%   4) Propósito y contribuciones principales del proyecto.
+% - Evitar citas en exceso aquí; se suelen incluir en "Related Work".
+% =========================================================================
 
-\subsection{Definición del Problema}
+\section{Introduction} \IEEEPARstart{L}{a} Universidad La Salle de Arequipa ha emprendido un proceso de modernización de su infraestructura tecnológica y académica, incorporando laboratorios con equipamiento de alto valor. En este contexto, surge la necesidad crítica de implementar un sistema que permita controlar, registrar y auditar los accesos a dichos espacios de manera formal y verificable. La gestión eficiente de estos recursos exige soluciones que garanticen no solo la seguridad física, sino también la trazabilidad inequívoca de las operaciones realizadas por el personal autorizado.
 
-\subsubsection{Título del Proyecto}
-Especificación Formal de un Sistema de Control de Acceso para Laboratorios en la Universidad La Salle de Arequipa (SICA-L ULASALLE).
+Los sistemas tradicionales de control, basados frecuentemente en registros manuales o mecanismos informales, resultan insuficientes ante los estándares actuales de seguridad. Esta carencia evidencia la vulnerabilidad ante errores humanos y dificulta la auditoría forense en caso de incidentes. Por consiguiente, resulta imperativo diseñar un mecanismo automatizado que incorpore criterios formales para eliminar ambigüedades, inconsistencias lógicas y brechas de seguridad que podrían comprometer la integridad institucional.
 
-\subsubsection{Justificación}
-La Universidad La Salle de Arequipa está expandiendo su infraestructura académica, dotando a nuevos laboratorios con equipos de alto valor, tecnología de punta y materiales de investigación esenciales. En este contexto, la ausencia de un sistema de control de acceso formal y robusto desde su concepción constituye una vulnerabilidad crítica.
+El presente artículo introduce el proyecto \textit{Especificación Formal de un Sistema de Control de Acceso para Laboratorios (SICA-L)}, desarrollado por estudiantes de la Universidad La Salle y expuesto en la Feria de Proyectos \textit{La Salle In-Genio 2025}. La propuesta central consiste en la aplicación de métodos formales, específicamente el lenguaje VDM++, para modelar las operaciones críticas del sistema tales como autenticación, autorización y registro asegurando la corrección matemática del diseño antes de su codificación.
 
-La protección de activos de información e infraestructura física es un requisito indispensable para el funcionamiento de cualquier organización. Los métodos tradicionales, como las bitácoras manuales, son insuficientes para entornos de alto valor debido a que son propensos a errores humanos, falsificación y carecen de capacidades de auditoría en tiempo real.
+Más allá de la especificación, el modelo es sometido a una rigurosa validación y verificación: se emplea análisis de cobertura para la lógica interna y herramientas de \textit{model checking} como NuSMV y UPPAAL para garantizar el cumplimiento de propiedades de seguridad y restricciones de tiempo real. De este modo, el trabajo establece un \textit{blueprint} formal y robusto, sirviendo como referencia replicable para futuras implementaciones en entornos académicos y de alta seguridad.
 
-La falta de un sistema de control de acceso genera riesgos directos significativos:
+% Si buscan más formas de poer agregar: tablas, imagenes, cuadros y otros elementos relevantes, en el final del código existe una guia de algunos elementos comunes que pueden encontrar para esta plantilla.
+
+% =========================================================================
+% SECCIONES PRINCIPALES DEL ARTÍCULO
+% =========================================================================
+
+% -----------------------------------------------------------
+% 1) TRABAJOS ANTERIORES / STATE OF THE ART
+% -----------------------------------------------------------
+\section{Trabajos Anteriores}
+% Breve resumen de investigaciones previas relacionadas con tu proyecto.
+% Incluir citas bibliográficas con \cite{}.
+% Ejemplo:
+% Varios estudios han abordado el problema de X \cite{ref1,ref2}.
+% Se destacan los métodos A \cite{ref3} y B \cite{ref4}, los cuales presentan limitaciones en...
+% Recomendación: utilizar subsecciones si hay varias líneas de trabajo.
+% \subsection{Enfoque A}
+% \subsection{Enfoque B}
+La aplicación de métodos formales para la especificación y verificación de sistemas de control de acceso es un campo de investigación bien establecido, ya que la seguridad y la fiabilidad son requisitos no negociables en estos sistemas. El presente trabajo se sitúa en la intersección de varias áreas de investigación consolidadas.
+
+El uso del \textit{Vienna Development Method} (VDM) y su extensión orientada a objetos, VDM++, para modelar sistemas críticos tiene una larga trayectoria. Autores como Bryans y Fitzgerald han demostrado cómo VDM++ puede ser utilizado para la ingeniería formal de políticas de control de acceso complejas, como las expresadas en XACML, permitiendo un análisis riguroso antes de la implementación \cite{bryans2008formal}. La versatilidad de VDM++ también se ha demostrado en la especificación de sistemas industriales, como los sistemas de autodefensa para aeronaves de combate, donde la precisión del modelo es fundamental para garantizar la seguridad operacional \cite{mukherjee1997computer}. Además, su aplicación se extiende a sistemas de transacciones seguras, como monederos electrónicos, donde la especificación formal ha sido clave para detectar errores sutiles en el código fuente \cite{stephens1996mondex}.
+
+El \textit{model checking} es la técnica de verificación por excelencia para encontrar fallos en sistemas concurrentes y de seguridad \cite{clarke2018model}. Herramientas como NuSMV y SPIN se han utilizado extensamente para analizar protocolos de seguridad y encontrar vulnerabilidades que las pruebas manuales no logran detectar, como en el famoso caso del protocolo Needham-Schroeder \cite{lowe1996breaking}. Se ha empleado, por ejemplo, para validar políticas de control de acceso expresadas en SecureUML, traduciéndolas a un lenguaje formal como B para realizar pruebas sistemáticas de permisos de roles \cite{basin2009model}. La formalización de propiedades de seguridad como autorización, autenticación, integridad y confidencialidad utilizando VDM-SL, el precursor de VDM++, ha demostrado la capacidad de estos métodos para especificar sistemas sin ambigüedades \cite{steer2003specifying}.
+
+En el ámbito de los sistemas de tiempo real, donde las restricciones temporales son tan importantes como la corrección lógica, UPPAAL es la herramienta de referencia \cite{larsen1997uppaal}. Se ha aplicado con éxito para verificar sistemas críticos como los controladores de semáforos inteligentes, donde un fallo en la temporización puede tener consecuencias catastróficas \cite{bengtsson1996verification}. Su capacidad para modelar y verificar protocolos con restricciones de tiempo también lo hace adecuado para analizar aspectos temporales en las políticas de control de acceso, como las definidas en el modelo \textit{Temporal Role-Based Access Control} (TRBAC) \cite{bertino1998trbac}.
+
+Este trabajo se distingue por su enfoque metodológico integral: no solo se especifica el sistema de control de acceso en VDM++, sino que se valida su lógica interna con análisis de cobertura y, crucialmente, se verifica formalmente con un doble enfoque de \textit{model checking}. Se utiliza NuSMV para probar la robustez de las políticas de seguridad desde una perspectiva lógica y atemporal, y UPPAAL para garantizar que el comportamiento del sistema cumple con las restricciones de tiempo del mundo real. Esta combinación de técnicas proporciona un nivel de confianza en la correctitud del sistema que es difícil de alcanzar con un único método.
+% -----------------------------------------------------------
+% 2) OBJETIVOS
+% -----------------------------------------------------------
+\section{Objetivos}
+\subsection{Objetivo General} Elaborar la especificación formal de un sistema de control de acceso para los nuevos laboratorios de la Universidad La Salle, que garantice la seguridad y la trazabilidad desde su puesta en marcha, y que sirva como modelo base escalable para otras instituciones de educación superior.
+
+\subsection{Objetivos Específicos} \begin{enumerate} \item Modelar las entidades clave del sistema: Usuarios, Laboratorios y Permisos de acceso. \item Especificar las políticas y reglas de acceso mediante un método formal para lograr la precisión necesaria en el diseño. \item Definir las operaciones críticas (como la verificación de acceso y gestión de permisos) y establecer los invariantes del sistema para asegurar su consistencia lógica. \end{enumerate}
+% Enumerar objetivos generales y específicos
+% Ejemplo:
+% \subsection{Objetivo General}
+% Desarrollar un sistema que permita...
+% \subsection{Objetivos Específicos}
+% \begin{enumerate}
+%   \item Analizar los factores que afectan...
+%   \item Implementar un prototipo de...
+%   \item Evaluar los resultados mediante...
+% \end{enumerate}
+
+% -----------------------------------------------------------
+% 3) METODOLOGÍA
+% -----------------------------------------------------------
+\section{Metodología}
+La metodología empleada en este trabajo es de naturaleza computacional y formal, basada en el ciclo de vida de desarrollo de software riguroso para sistemas críticos. El proceso se centra en la transformación sistemática de requerimientos informales en especificaciones matemáticas precisas, permitiendo la detección temprana de ambigüedades y errores lógicos.
+
+El desarrollo del proyecto se ha estructurado en cuatro etapas secuenciales e iterativas, tal como se ilustra en el diagrama de flujo de la Fig. \ref{fig:metodologia}, y se detalla a continuación:
+
+\subsection{Análisis y Abstracción de Requerimientos}
+En esta etapa inicial se realizó la recopilación de datos mediante la observación de los procesos actuales de acceso en los laboratorios de la Universidad La Salle. Se identificaron los actores (estudiantes, docentes, administrativos), los recursos (laboratorios) y las restricciones operativas.
 \begin{itemize}
-    \item \textbf{Riesgo de Seguridad:} Facilita el posible robo, daño o mal uso de equipos costosos, comprometiendo la inversión.
+    \item \textbf{Entrada:} Reglas de negocio en lenguaje natural y entrevistas con los responsables de laboratorio.
+    \item \textbf{Salida:} Lista refinada de Requerimientos Funcionales (RF) y un Diagrama de Clases UML preliminar.
+\end{itemize}
+
+\subsection{Especificación Formal con VDM++}
+Esta fase constituye el núcleo del modelado teórico. Se procedió a la formalización de la estructura estática y dinámica del sistema utilizando el lenguaje \textit{Vienna Development Method} orientado a objetos (VDM++). Se definieron tres componentes matemáticos clave:
+\begin{enumerate}
+    \item \textbf{Tipos de Datos:} Abstracción de entidades mediante \texttt{types} personalizados.
+    \item \textbf{Invariantes de Estado:} Ecuaciones lógicas que restringen los valores permitidos de las variables de instancia para mantener la integridad del sistema.
+\end{enumerate}
+
+\subsection{Validación Interna y Análisis de Cobertura}
+Para garantizar la consistencia interna del modelo, se empleó una metodología experimental de pruebas basadas en escenarios. Utilizando la herramienta \textit{VDM++ Toolbox}.
+
+El criterio de éxito establecido fue alcanzar un 100\% de cobertura de código (\textit{statement coverage}), asegurando que todas las líneas de la especificación, incluyendo las cláusulas de manejo de excepciones, fueran ejercitadas durante la simulación.
+
+\subsection{Verificación de Modelos (Model Checking)}
+Finalmente, se realizó la verificación externa de propiedades críticas mediante técnicas de \textit{Model Checking}, dividiendo el análisis en dos dominios complementarios:
+
+\subsubsection{Seguridad Lógica (NuSMV)}
+Se tradujo el modelo a una máquina de estados finitos para verificar propiedades de seguridad (\textit{safety properties}) expresadas en Lógica de Árbol Computacional (CTL), asegurando matemáticamente que nunca ocurra un estado prohibido.
+
+\subsubsection{Tiempo Real (UPPAAL)}
+Se modeló el sistema como una red de autómatas temporizados para validar restricciones temporales (\textit{liveness properties}), verificando que el sistema responda a las solicitudes de acceso dentro de los plazos establecidos (latencia máxima permitida).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=2.5in]{Imagenes/diagrama_metodologia.png}    
+    \caption{Diagrama de flujo de la metodología}
+    \label{fig:metodologia}
+\end{figure}
+% Explicar la metodología empleada: experimental, teórica, computacional, etc.
+% Se puede usar diagramas de flujo, pseudocódigo, ecuaciones.
+% Ejemplo:
+% El proceso sigue tres etapas principales: (i) recopilación de datos, (ii) procesamiento, y (iii) análisis de resultados.
+% \begin{figure}[!t]
+%   \centering
+%   \includegraphics[width=2.5in]{metodologia_diagrama}
+%   \caption{Diagrama de flujo de la metodología}
+%   \label{fig:metodologia}
+% \end{figure}
+
+% -----------------------------------------------------------
+% 4) DESARROLLO / IMPLEMENTACIÓN
+% -----------------------------------------------------------
+\section{Desarrollo}
+% Descripción detallada de la implementación o desarrollo del proyecto.
+% Se pueden incluir subsecciones, ecuaciones, figuras, algoritmos.
+% Ejemplo:
+% \subsection{Arquitectura del sistema}
+% \begin{figure}[!t]
+%   \centering
+%   \includegraphics[width=2.5in]{arquitectura}
+%   \caption{Arquitectura propuesta}
+%   \label{fig:arquitectura}
+% \end{figure}
+%
+% \subsection{Algoritmo principal}
+% \begin{algorithm}[H]
+%   \caption{Algoritmo de procesamiento de datos}
+%   \begin{algorithmic}
+%     \STATE Inicializar parámetros
+%     \STATE Ejecutar ciclo principal
+%     \STATE Retornar resultados
+%   \end{algorithmic}
+% \end{algorithm}
+
+% -----------------------------------------------------------
+En esta sección se detalla la aplicación práctica de la metodología formal al diseño y verificación del Sistema de Control de Acceso para Laboratorios (SICA-L).
+
+\subsection{Planteamiento del problema}
+La Universidad La Salle de Arequipa se encuentra en un proceso de expansión de su infraestructura académica, dotando a nuevos laboratorios con equipos de alto valor, tecnología de punta y materiales de investigación sensibles. En este contexto, la ausencia de un sistema de control de acceso formal y robusto constituye una vulnerabilidad crítica. Los métodos tradicionales, como las bitácoras manuales, son insuficientes para este entorno, ya que son propensos a errores humanos, falsificación y carecen de capacidades de auditoría en tiempo real.
+
+La falta de un sistema adecuado genera riesgos directos y significativos:
+\begin{itemize}
+    \item \textbf{Riesgo de Seguridad:} Facilita el posible robo, daño o mal uso de equipos costosos, comprometiendo la inversión institucional.
     \item \textbf{Riesgo de Integridad Académica:} Permite la manipulación no autorizada de experimentos o datos de investigación.
-    \item \textbf{Riesgo de Seguridad Operacional:} El ingreso de personal no capacitado a laboratorios con materiales específicos puede derivar en accidentes.
-    \item \textbf{Falta de Trazabilidad:} Impide determinar quién se encontraba en las instalaciones durante un incidente, dificultando la rendición de cuentas.
+    \item \textbf{Falta de Trazabilidad:} Impide determinar con certeza quién se encontraba en las instalaciones durante un incidente, dificultando la rendición de cuentas.
 \end{itemize}
 
-Dado que el sistema aún no existe, la universidad tiene la oportunidad única de diseñar e implementar una solución correcta desde el principio (\textit{greenfield}).
+Dado que el sistema aún no existe, la universidad tiene la oportunidad única de diseñar e implementar una solución correcta desde su concepción, un enfoque conocido como \textit{greenfield}.
 
-\subsection{Objetivos}
+\subsection{Solución propuesta}
+Se propone el diseño de un Sistema de Control de Acceso (SICA-L) desarrollado íntegramente mediante métodos formales. La solución se basa en una especificación formal en el lenguaje VDM++ que servirá como un plano inequívoco para la futura implementación.
 
-\subsubsection{Objetivo General}
-Elaborar la especificación formal en VDM++ de un Sistema de Control de Acceso (SICA-L) para los nuevos laboratorios de la Universidad La Salle, que garantice la seguridad y la trazabilidad desde su puesta en marcha y que sirva como modelo base escalable para otras instituciones de educación superior.
-
-\subsubsection{Objetivos Específicos}
-\begin{enumerate}
-    \item Modelar formalmente las entidades clave del sistema: Usuarios, Laboratorios y Permisos de acceso.
-    \item Especificar las políticas y reglas de acceso mediante un método formal para lograr precisión.
-    \item Definir formalmente las operaciones críticas (como la verificación de acceso y gestión de permisos) y establecer los invariantes del sistema.
-\end{enumerate}
-
-% ----------------------------------------
-\section{Trabajos Relacionados o Antecedentes}
-El desarrollo de este proyecto se apoya en varios campos de la seguridad informática y la ingeniería de software:
-
-\subsection{Sistemas de Control de Acceso Físico (PACS)}
-El sistema propuesto define la lógica que operará sobre diversas tecnologías de hardware, como los identificadores electrónicos que gestionan el acceso a áreas restringidas. En el contexto universitario, la implementación de un sistema de control de acceso basado en reconocimiento facial e inteligencia artificial (IA) es un antecedente directo \cite{Qin2022Face}, ya que permite la gestión inteligente de laboratorios. 
-
+Este modelo no solo se valida para asegurar su consistencia lógica interna, sino que también se somete a un riguroso proceso de verificación formal utilizando una doble estrategia de \textit{model checking}:
 \begin{itemize}
-    \item \textbf{Modelos de Control de Acceso RBAC/ABAC:} El modelo Temporal-RBAC (TRBAC) \cite{Bertino2001TRBAC, Bertino1999Temporal} soporta habilitación y deshabilitación periódica de roles.
-    \item \textbf{Métodos Formales (VDM++):} Permiten descubrir ambigüedades y errores en especificaciones \cite{Bryans2007VDM}.
-    \item \textbf{Formalización de Políticas (XACML):} Permite describir políticas sensibles al contexto \cite{Bryans2007VDM}.
-    \item \textbf{Verificación de Políticas de Control de Acceso:} Basadas en ABAC \cite{NISTSP800-162, NISTSP800-192}.
+    \item \textbf{Verificación de Propiedades de Seguridad:} Se utilizará NuSMV para demostrar matemáticamente que el sistema es inmune a vulnerabilidades lógicas, como la concesión de acceso indebido.
+    \item \textbf{Verificación de Propiedades de Tiempo Real:} Se empleará UPPAAL para garantizar que el sistema responde dentro de las restricciones temporales requeridas para una interacción fluida y segura en el mundo real.
 \end{itemize}
 
-% ----------------------------------------
-\section{Requerimientos Funcionales}
-
-De la problemática descrita se han identificado los siguientes requerimientos funcionales:
-
+\subsection{Requerimientos}
+A partir del problema, se han identificado los siguientes requerimientos funcionales:
 \begin{itemize}
-    \item[\textbf{RF1}] El sistema debe permitir a un administrador registrar, modificar y dar de baja a los usuarios. Cada usuario debe tener un identificador único institucional, nombre completo y un rol definido.
-    \item[\textbf{RF2}] El sistema debe permitir a un administrador asignar y revocar el permiso de acceso de un usuario a uno o más laboratorios específicos.
-    \item[\textbf{RF3}] El sistema debe proveer una operación para procesar una solicitud de acceso, verificando la identidad del usuario y su autorización vigente para el laboratorio en cuestión.
-    \item[\textbf{RF4}] El sistema debe registrar de forma inmutable cada intento de acceso. Este registro de auditoría (\textit{audit trail}) es esencial para la seguridad, ya que proporciona los medios para detectar y analizar las violaciones de la política. La bitácora debe almacenar ID de usuario, laboratorio, fecha, hora y resultado.
-    \item[\textbf{RF5}]  Tras un acceso aprobado, el sistema debe registrar formalmente el ingreso de un usuario al laboratorio. Debe existir una operación complementaria para registrar su salida.
+    \item \textbf{RF1:} Registrar, modificar y dar de baja usuarios con identificador institucional único.
+    \item \textbf{RF2:} Asignar y revocar permisos de acceso a uno o varios laboratorios.
+    \item \textbf{RF3:} Procesar solicitudes de acceso, verificando identidad y autorización.
+    \item \textbf{RF4:} Registrar de manera inmutable todos los intentos de acceso (\textit{audit trail}).
+    \item \textbf{RF5:} Registrar formalmente la entrada y salida de los usuarios autorizados.
 \end{itemize}
 
-% ----------------------------------------
-\section{Metodología y Desarrollo}
-\begin{enumerate}
-    \item \textbf{Modelado de Entidades y Tipos de Datos:} El primer paso es la traducción de los conceptos del mundo real a un modelo matemático, aprovechando la separación de tipos de datos y funcionalidad de VDM++. Se definirán las clases (\textit{clases}) y variables de instancia (\textit{instance variables}) para las entidades clave (Usuarios, Laboratorios, Permisos, Roles). Se utilizarán tipos abstractos como mapas, conjuntos y registros para describir el estado local del sistema.
-    \item \textbf{Definición de Invariantes y Operaciones Críticas:} Se definirán formalmente las operaciones que rigen el sistema (RF1, RF2, RF3, RF5) mediante precondiciones y postcondiciones. Los invariantes del sistema se establecerán para asegurar la consistencia lógica, garantizando que el modelo no pueda alcanzar un estado incoherente tras la ejecución de las operaciones.
-    \item \textbf{Especificación de Políticas de Control de Acceso:} Las reglas de acceso se especificarán utilizando un lenguaje de lógica formal, similar a la estructura de reglas de XACML, donde las decisiones de acceso pueden depender de atributos del sujeto, el objeto y las condiciones ambientales (tiempo, rol, etc.). Esto se modela mediante expresiones lógicas (\textit{FExp} en VDM++) que se evalúan en función del entorno dinámico.
-    \item \textbf{Verificación y Validación del Modelo:} El modelo formal se someterá a validación mediante la ejecución directa en el intérprete de VDMTools. Se aplicarán pruebas (\textit{testing}) utilizando peticiones de acceso (\textit{requests}) simuladas para obtener retroalimentación rápida sobre el comportamiento de la política. Para problemas más complejos (como la verificación de la lógica de las reglas ABAC), pueden emplearse métodos de \textit{pseudo-exhaustive testing} que utilizan técnicas combinatorias (como ACTS) para generar conjuntos de pruebas eficientes que aseguren la cobertura de las interacciones de atributos y condiciones, reduciendo el tamaño del conjunto de pruebas a un nivel manejable. Esto es crucial para detectar fallos semánticos como reglas conflictivas o incompletas.
-\end{enumerate}
+\subsection{Diagrama de clases}
+El primer paso del modelado es definir la estructura estática del sistema. El diagrama de clases UML muestra las entidades principales del SICA-L (Usuario, Laboratorio, Evento) y la clase central \texttt{SistemaControlAcceso} que orquesta las interacciones entre ellas.
 
-% ----------------------------------------
-\section{Resultados y Discusión}
-El resultado principal del proyecto es la generación de un modelo de especificación formal y ejecutable en VDM++.
-
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.8\columnwidth]{ClaseSistemaParte1.png}
-\caption{Especificación de la Clase Sistema Parte 1 en VDM++.}
-\label{fig:clase_sistema_parte_1}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/DiagramaClases.png}
+    \caption{Diagrama de Clases UML del Sistema SICA-L.}
+    \label{fig:diagrama_clases}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.8\columnwidth]{ClaseSistemaParte2.png}
-\caption{Especificación de la Clase Sistema Parte 2 en VDM++.}
-\label{fig:clase_sistema_parte_2}
+\subsection{Modelo en VDM}
+La estructura definida en el diagrama de clases se traduce a una especificación formal en VDM++. Se utilizan tipos de datos como \texttt{set of} para gestionar las colecciones de usuarios y laboratorios, y \texttt{map nat1 to set of nat1} para representar la matriz de permisos. Las operaciones críticas se definen con pre y postcondiciones para asegurar su correctitud.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseSistemaParte1.png}
+    \caption{Especificación VDM++ de la clase Sistema - Parte 1.}
+    \label{fig:vdm_parte1}
 \end{figure}
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.8\columnwidth]{ClaseSistemaParte3.png}
-\caption{Especificación de la Clase Sistema Parte 3 en VDM++.}
-\label{fig:clase_sistema_parte_3}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseSistemaParte2.png}
+    \caption{Especificación VDM++ de la clase Sistema - Parte 2.}
+    \label{fig:vdm_parte2}
 \end{figure}
-% ----------------------------------------
 
-\subsection{Discusión sobre Seguridad y Precisión Formal}
-La aplicación de métodos formales garantiza que la política de acceso será una declaración precisa de las reglas que deben cumplirse. La especificación formal permite identificar discrepancias entre los requisitos de alto nivel y la implementación deseada, previniendo vulnerabilidades serias en el mecanismo de control de acceso.
-La especificación del SICA-L debe apuntar a la seguridad del sistema, la trazabilidad y la resistencia a ataques comunes. Dado que el sistema requiere una autenticación previa para el control de acceso (RF3), la elección de la tecnología de autenticación es relevante. Tecnologías como ECC (\textit{Elliptic Curve Cryptography}) basadas en RFID son antecedentes sólidos en entornos de IoT de alta sensibilidad (como la atención médica) \cite{Noori2022ECC}, ofreciendo costos computacionales y de comunicación más bajos y resistencia probada contra ataques de \textit{Man-in-the-Middle}, \textit{Replay attack} y ataques de falsificación (\textit{forging attack}). Implementar un protocolo de autenticación mutua (donde la tarjeta autentica al lector y viceversa) es una característica de seguridad clave que resiste ataques de Denegación de Servicio (DoS).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseSistemaParte3.png}
+    \caption{Especificación VDM++ de la clase Sistema - Parte 3.}
+    \label{fig:vdm_parte3}
+\end{figure}
 
-\subsection{Discusión sobre la Complejidad del Diseño}
-Aunque el uso de métodos formales garantiza precisión y coherencia lógica (a través de invariantes), un modelo de control de acceso preciso puede ser inherentemente complejo. Los modelos detallados de control de acceso que involucran atributos o roles temporales (como TRBAC) pueden llevar a especificaciones que, si no se verifican, pueden ser ambiguas o inconsistentes. El proceso de verificación del modelo se vuelve tan crucial como la modelización misma, enfocándose en la verificación de la integridad, la cobertura y la ausencia de fallas como la fuga de privilegios (\textit{privilege leakage}) o el bloqueo de privilegios (\textit{privilege blocking}).
-% ----------------------------------------
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseSistemaParte4.png}
+    \caption{Especificación VDM++ de la clase Sistema - Parte 4.}
+    \label{fig:vdm_parte4}
+\end{figure}
 
-% ----------------------------------------
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseEvento.png}
+    \caption{Especificación VDM++ de la clase Evento.}
+    \label{fig:vdm_evento}
+\end{figure}
 
-\section{Análisis de Cobertura}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseLaboratorio.png}
+    \caption{Especificación VDM++ de la clase Laboratorio.}
+    \label{fig:vdm_laboratorio}
+\end{figure}
 
-El siguiente bloque muestra el código correspondiente al análisis de cobertura del sistema:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/ClaseUsuario.png}
+    \caption{Especificación VDM++ de la clase Usuario.}
+    \label{fig:vdm_usuario}
+\end{figure}
+
+\subsection{Análisis de cobertura}
+La validación del modelo se realizó a través del intérprete de comandos de \textit{VDM++ Toolbox}. Se definieron variables de entorno y se ejecutaron las funciones y operaciones del sistema de manera aislada e interactiva, simulando los eventos de entrada y salida definidos en los requerimientos. Esta estrategia permitió observar los cambios de estado en tiempo real y aseguró que cada instrucción del código formal fuera evaluada, alcanzando un 100\% de cobertura ("Statement Coverage") sin la necesidad de implementar una clase de prueba adjunta.
 
 \lstinputlisting[style=codigo, language=]{AnalisisCobertura.txt}
 \clearpage
 
-\begin{figure}[ht]
-\centering
-\includegraphics[width=0.8\columnwidth]{Coverage100.png}
-\caption{Resultado del Análisis de Cobertura}
-\label{fig:analisis_covertura}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/Coverage100.png}
+    \caption{Reporte de Cobertura del 100\% generado por VDM++ Toolbox.}
+    \label{fig:cobertura_vdm}
 \end{figure}
-% ----------------------------------------
 
+\subsection{Modelo en NuSMV}
+Para la verificación formal de las políticas de seguridad, el modelo VDM++ se abstrajo a un modelo de estados finitos en NuSMV. Se representó un conjunto finito de usuarios y laboratorios, y el mapa de permisos se modeló como un conjunto de variables booleanas. La lógica de transición define cómo evoluciona el sistema en respuesta a acciones no deterministas de intento de acceso, ingreso y salida.
+
+\lstinputlisting[style=codigo, language=]{SICA-L.smv}
+\clearpage
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{Imagenes/resultado NuSMV.png}
+    \caption{Resultado de la verificación en NuSMV.}
+    \label{fig:nusmv}
+\end{figure}
+
+\subsection{Modelo en UPPAAL}
+Para analizar el comportamiento temporal, el proceso de acceso se modeló como una red de autómatas temporizados en UPPAAL. Este modelo incluye estados como \textit{Ocioso}, \textit{EsperandoVerificacion} y \textit{AccesoConcedido}, y utiliza variables de reloj para medir la duración de las operaciones críticas, como la consulta a la base de datos de permisos.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{imagenes/Modelo_de_Automata_Temporizado_en_UPPAAL.png}
+    \caption{Modelo de Autómata Temporizado en UPPAAL para el Proceso de Verificación de Acceso.}
+    \label{fig:modelo_uppaal}
+\end{figure}
+
+\subsection{Validación en UPPAAL}
+El modelo en UPPAAL fue validado de dos maneras. Primero, mediante simulación, se ejecutaron trazas para observar visualmente que el sistema se comportaba según lo esperado bajo diferentes escenarios temporales. Segundo, se utilizó el verificador de UPPAAL para probar formalmente propiedades expresadas en TCTL (\textit{Timed Computation Tree Logic}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{imagenes/Simulacion_de_una_Traza_de_Acceso_Exitoso_en_UPPAAL.png}
+    \caption{Simulación de una Traza de Acceso Exitoso en el Simulador de UPPAAL.}
+    \label{fig:simulacion_uppaal}
+\end{figure}
+
+Se verificaron propiedades como \texttt{A[] (Solicitud implies (Respuesta.reloj <= 2))}, que establece que el sistema debe responder a cualquier solicitud de acceso en un máximo de 2 unidades de tiempo. Los resultados confirmaron que el modelo cumple con todas las restricciones temporales especificadas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=3.0in]{imagenes/Resultados_de_la_Verificacion_en_UPPAAL.png}
+    \caption{Resultados de la Verificación de Propiedades Temporales en el Verificador de UPPAAL.}
+    \label{fig:resultados_uppaal}
+\end{figure}
+% 5) RESULTADOS
+% -----------------------------------------------------------
+\section{Resultados}
+% Presentar los resultados obtenidos. Usar figuras, tablas y gráficos.
+% Ejemplo:
+% \begin{figure}[!t]
+%   \centering
+%   \includegraphics[width=2.5in]{resultado_grafico}
+%   \caption{Comparativa de resultados obtenidos}
+%   \label{fig:resultados}
+% \end{figure}
+%
+% \begin{table}[!t]
+%   \caption{Tabla de resultados experimentales}
+%   \centering
+%   \begin{tabular}{|c|c|c|}
+%     \hline
+%     Parámetro & Valor esperado & Valor obtenido \\ \hline
+%     X & 10 & 9.8 \\ \hline
+%     Y & 5 & 5.1 \\ \hline
+%   \end{tabular}
+%   \label{tab:resultados}
+% \end{table}
+
+% -----------------------------------------------------------
+% 6) DISCUSIÓN
+% -----------------------------------------------------------
+\section{Discusión}
+% Analizar los resultados: interpretación, comparación con trabajos anteriores, ventajas y limitaciones.
+% Ejemplo:
+% Los resultados muestran una mejora de 15\% respecto al método A \cite{ref1}. Esto se debe a...
+% Limitaciones: el sistema no considera factores Z, lo que puede afectar...
+
+% -----------------------------------------------------------
+% 7) CONCLUSIONES
+% -----------------------------------------------------------
 \section{Conclusiones}
-La especificación formal de un Sistema de Control de Acceso (SICA-L) en la Universidad La Salle de Arequipa es una respuesta necesaria y proactiva ante la falta de un mecanismo robusto y auditable. El modelo en VDM++ permitirá definir entidades, operaciones críticas y reglas de acceso de forma rigurosa y verificable.
+% Resumir hallazgos principales y posibles trabajos futuros.
+% Ejemplo:
+% Este proyecto demuestra que la metodología propuesta permite...
+% Futuras líneas de trabajo incluyen la optimización de...
 
+% -----------------------------------------------------------
+% 8) AGRADECIMIENTOS (opcional)
+% -----------------------------------------------------------
+\section*{Agradecimientos}
+Agradezco a mi profesor de Comunicación II José Peñaloza
+% Reconocer apoyo de instituciones, profesores o colaboradores.
+% Ejemplo:
+% Los autores agradecen a la Universidad La Salle por el soporte brindado durante el desarrollo de este proyecto.
 
-\bibliographystyle{IEEEtran}
-\bibliography{referencias}
+% =========================================================================
+% APPENDIX / APÉNDICE
+% =========================================================================
+% Si tienes un solo apéndice:
+%\appendix[Nombre del Apéndice]
+% - Aquí se incluyen materiales adicionales que complementan el cuerpo principal:
+%   Ejemplos: demostraciones matemáticas, cálculos extensos, detalles de algoritmos,
+%   tablas de datos completas, pruebas técnicas, derivaciones largas, código fuente, etc.
+% - Usar \section*{Título} para secciones internas si es necesario.
+% - No usar \section normal después de \appendix.
+%
+% Ejemplo:
+
+% Si tienes múltiples apéndices:
+% \appendices
+% \section{Apéndice A: Algoritmos Completos}
+% Texto completo del algoritmo que se resumió en el artículo.
+% \section{Apéndice B: Datos Experimentales}
+% Tablas y resultados completos de experimentos o simulaciones.
+% \section{Apéndice C: Material Complementario}
+% Cualquier otra información que sea relevante pero demasiado extensa para incluir
+% en el cuerpo principal del artículo.
+
+% =========================================================================
+% REFERENCIAS / BIBLIOGRAFÍA
+% =========================================================================
+% 1) Usando BibTeX (recomendado):
+% - Mantener archivo .bib con todas las referencias.
+%para mostrar todas las referencias si es que no se citaron
+\begin{thebibliography}{00}
+
+\bibitem{bryans2008formal}
+J. Bryans, J. Fitzgerald, H. C. B. Oliveira, and P. V. Thaviero, ``Formal engineering of XACML access control policies,'' in \textit{Proc. 10th Int. Conf. Formal Eng. Methods (ICFEM)}, Kitakyushu, Japan, 2008, pp. 37--56.
+
+\bibitem{mukherjee1997computer}
+P. Mukherjee, ``Computer-aided validation of a defensive aids system specification,'' \textit{IEE Proceedings - Software}, vol. 144, no. 4, pp. 182--188, Aug. 1997.
+
+\bibitem{stephens1996mondex}
+K. Stephens and P. Sutton, ``The Mondex Electronic Purse,'' in \textit{Formal Methods for Industrial Applications}, vol. 1165, Lecture Notes in Computer Science, Berlin: Springer, 1996, pp. 50--63.
+
+\bibitem{clarke2018model}
+E. M. Clarke, T. A. Henzinger, H. Veith, and R. Bloem, \textit{Handbook of Model Checking}. Cham: Springer, 2018.
+
+\bibitem{lowe1996breaking}
+G. Lowe, ``Breaking and fixing the Needham-Schroeder Public-Key Protocol using FDR,'' in \textit{Tools and Algorithms for the Construction and Analysis of Systems}, vol. 1055, Lecture Notes in Computer Science, Berlin: Springer, 1996, pp. 147--166.
+
+\bibitem{basin2009model}
+D. Basin, J. Doser, and T. Lodderstedt, ``Model driven security: From UML models to access control architectures,'' \textit{ACM Trans. Softw. Eng. Methodol.}, vol. 15, no. 1, pp. 39--91, 2006.
+
+\bibitem{steer2003specifying}
+K. Steer, ``Specifying security properties in VDM-SL,'' in \textit{Proc. 1st Overture Workshop}, 2003.
+
+\bibitem{larsen1997uppaal}
+K. G. Larsen, P. Pettersson, and W. Yi, ``UPPAAL in a nutshell,'' \textit{Int. J. Softw. Tools Technol. Transf.}, vol. 1, no. 1-2, pp. 134--152, 1997.
+
+\bibitem{bengtsson1996verification}
+J. Bengtsson, K. G. Larsen, F. Larsson, P. Pettersson, and W. Yi, ``UPPAAL: a tool suite for automatic verification of real-time systems,'' in \textit{Hybrid Systems III}, vol. 1066, Lecture Notes in Computer Science, Springer, 1996, pp. 232--243.
+
+\bibitem{bertino1998trbac}
+E. Bertino, C. Bettini, E. Ferrari, and P. Samarati, ``An access control model supporting periodicity constraints and temporal reasoning,'' \textit{ACM Trans. Database Syst.}, vol. 23, no. 3, pp. 231--285, 1998.
+
+\end{thebibliography}
+
+%
+% 2) Manualmente:
+% - Usar entorno thebibliography si no se usa BibTeX.
+% - Cada referencia se declara con \bibitem{clave} y luego se cita con \cite{clave}.
+% - Mantener consistencia en nombres de autores, títulos, volúmenes, páginas, URLs y DOI.
+%
+% Ejemplos de referencias:
+% \begin{thebibliography}{9}
+% \bibitem{ref1} Autor, "Título del artículo," Revista, vol., no., pp., año.
+% \bibitem{ref2} Autor, "Título," Libro, Editorial, año.
+% \bibitem{ref3} Autor, "Título en línea," [Online]. Available: URL, año.
+% \end{thebibliography}
+%
+% Notas importantes:
+% - Incluir DOI si está disponible.
+% - Para artículos en línea, poner [Online] y la URL.
+% - Mantener formato consistente con IEEE (mayúsculas, minúsculas, comas, puntos).
+
+\newpage
 
 \end{document}
+
+% =========================================================================
+% IEEE LaTeX Quick Guide – Comentarios y Ejemplos
+% =========================================================================
+
+% 1) SECCIONES
+% - Numeración recomendada:
+%   Primarias: números romanos      -> \section{Introduction}
+%   Secundarias: letras mayúsculas  -> \subsection{Related Work}
+%   Terciarias: números arábigos    -> \subsubsection{Algorithm Details}
+%   Cuaternarias: letras minúsculas -> usar si es necesario
+% - Reference y Acknowledgment no se numeran.
+% Ejemplo:
+% \section{Introduction}
+% \subsection{Motivation}
+% \subsubsection{Previous Work}
+
+% 2) CITAS
+% - Usar \cite{} para referencias
+% - Múltiples referencias: \cite{ref1,ref2,ref3}
+% Ejemplo:
+% Como se muestra en \cite{ref1,ref2}, los resultados son consistentes.
+
+% 3) LISTAS
+% a) Sin numeración
+% \begin{list}{}{}
+%   \item Elemento A
+%   \item Elemento B
+% \end{list}
+% b) Numeradas
+% \begin{enumerate}
+%   \item Primer punto
+%   \item Segundo punto
+% \end{enumerate}
+% c) Con viñetas
+% \begin{itemize}
+%   \item Punto 1
+%   \item Punto 2
+% \end{itemize}
+
+% 4) FIGURAS
+% - Caption después de la imagen
+% - Label después del caption
+% - Ejemplo:
+% \begin{figure}[!t]
+%   \centering
+%   \includegraphics[width=2.5in]{fig1}
+%   \caption{Resultados de la simulación}
+%   \label{fig:sim}
+% \end{figure}
+% - Figuras dobles con subfiguras:
+% \begin{figure*}[!t]
+%   \centering
+%   \subfloat[]{\includegraphics[width=2.5in]{fig1}\label{fig:first}}
+%   \hfil
+%   \subfloat[]{\includegraphics[width=2.5in]{fig2}\label{fig:second}}
+%   \caption{(a) Caso 1 (b) Caso 2}
+%   \label{fig:double}
+% \end{figure*}
+
+% 5) TABLAS
+% - Caption antes de la tabla
+% - Fuente: footnotesize
+% - Label después del caption
+% - Ejemplo:
+% \begin{table}[!t]
+%   \caption{Ejemplo de tabla}
+%   \centering
+%   \begin{tabular}{|c|c|}
+%     \hline
+%     A & B \\ \hline
+%     1 & 2 \\ \hline
+%   \end{tabular}
+%   \label{tab:example}
+% \end{table}
+
+% 6) ALGORITMOS
+% - Numerados y con título
+% - Separados por líneas horizontales
+% - Ejemplo:
+% \begin{algorithm}[H]
+%   \caption{Algoritmo de ejemplo}
+%   \begin{algorithmic}
+%     \STATE Inicializar variables
+%     \STATE Ejecutar proceso
+%     \STATE Retornar resultados
+%   \end{algorithmic}
+% \end{algorithm}
+
+% 7) ECUACIONES
+% - Numeración consecutiva: (1), (2), (3)…
+% - No usar guiones ni puntos: (1a) en vez de (1-a)
+% - Referencias con \ref{}: (\ref{eq:example})
+% - Multi-línea: usar align o multline
+% - Subequaciones: subequations
+% Ejemplo simple:
+% \begin{equation}
+%   x = \sum_{i=0}^{n} 2i Q
+%   \label{eq:example}
+% \end{equation}
+% Ejemplo multi-línea:
+% \begin{align}
+%   a &= b + c \\
+%   d &= e + f
+% \end{align}
+% Subequaciones:
+% \begin{subequations}\label{eq:sub}
+%   \begin{align}
+%     f &= g \\
+%     f' &= g'
+%   \end{align}
+% \end{subequations}
+
+% 8) MATRICES Y ARRAYS
+% - Matrices: matrix, pmatrix, bmatrix, Bmatrix, vmatrix, Vmatrix
+% - Arrays: personalizar alineación con c, r, l y reglas verticales "|"
+% Ejemplo:
+% \begin{equation}
+%   \begin{bmatrix} 1 & 2 \\ 3 & 4 \end{bmatrix}
+% \end{equation}
+% \begin{equation}
+%   \left(\begin{array}{c|c} a & b \\ \hline c & d \end{array}\right)
+% \end{equation}
+
+% 9) ESTRUCTURAS DE CASOS
+% - Usar el entorno cases
+% - "&" para alinear columnas
+% Ejemplo:
+% \begin{equation*}
+%   z_m(t) = 
+%   \begin{cases}
+%     1,& \text{si } \beta_m(t)\\
+%     0,& \text{en otro caso}
+%   \end{cases}
+% \end{equation*}
+
+% 10) FUNCIONES EN ECUACIONES
+% - Funciones comunes: \sin, \max, \argmin
+% - Funciones personalizadas: \text{}
+% Ejemplo:
+% \begin{equation*}
+%   d_R^{KM} = \underset{d_l^{KM}}{\text{arg min}}\{d_1^{KM},...,d_6^{KM}\}
+% \end{equation*}
+
+% 11) ACRÓNIMOS EN ECUACIONES
+% - Usar \text{} para mantener consistencia con el texto
+% Ejemplo:
+% \begin{equation*}
+%   \text{MSE} = \frac{1}{n}\sum_{i=1}^{n}(Y_i - \hat{Y}_i)^2
+% \end{equation*}
+
