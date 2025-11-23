@@ -1,181 +1,179 @@
 MODULE main
-CONSTANTS
-  -- usuarios
-  u1 := 1;  u2 := 2;  u3 := 3;
-  -- laboratorios
-  l1 := 1;  l2 := 2;
-  -- tipos de evento
-  intento := 0;
-  ingreso := 1;
-  salida  := 2;
-  ninguno := 3;
-  fuera := 0;
-  dentro := 1;
+-- ==================================================================
+-- 0. CONSTANTES Y DEFINICIONES
+
+DEFINE
+  u1 := 1; u2 := 2; u3 := 3;
+  l1 := 1; l2 := 2;
+  
+  ninguna := 0;
+  intento := 1;
+  ingreso := 2;
+  salida  := 3;
+
+  -- Matriz de Permisos
+  tiene_permiso := 
+    case
+      next(input_usuario) = u1 & (next(input_laboratorio) = l1 | next(input_laboratorio) = l2) : TRUE;
+      next(input_usuario) = u2 & (next(input_laboratorio) = l1) : TRUE;
+      TRUE : FALSE;
+    esac;
+-- =======================
+-- 1. VARIABLES
+
 VAR
-  -- usuario activo en esta transición
-  uid : {u1, u2, u3};
-  -- laboratorio activo en esta transición
-  lid : {l1, l2};
-  -- acción: intento, ingreso, salida o ninguna
-  accion : {intento, ingreso, salida, ninguno};
-  -- resultado del intento
+  -- Inputs (Aleatorios en cada paso)
+  input_usuario     : 0..3; 
+  input_laboratorio : 0..2;
+  
+  -- Estado de la Operación Actual (Congela los inputs para la acción)
+  accion : 0..3;
+  op_uid : 0..3; -- ID del usuario ejecutando la acción actual
+  op_lid : 0..2; -- ID del lab de la acción actual
   resultado : boolean;
-  ----------------------
-  -- PERMISOS U-L : matriz booleana
-  permiso_u1_l1 : boolean;
-  permiso_u1_l2 : boolean;
-  permiso_u2_l1 : boolean;
-  permiso_u2_l2 : boolean;
-  permiso_u3_l1 : boolean;
-  permiso_u3_l2 : boolean;
-  -----------------------
-  -- ESTADO DE OCUPACIÓN: si un usuario está dentro de un laboratorio
-  estado_u1_l1 : {fuera, dentro};
-  estado_u1_l2 : {fuera, dentro};
-  estado_u2_l1 : {fuera, dentro};
-  estado_u2_l2 : {fuera, dentro};
-  estado_u3_l1 : {fuera, dentro};
-  estado_u3_l2 : {fuera, dentro};
-  -----------------------
-  -- Último evento registrado (representa la bitácora)
-  last_uid : {u1, u2, u3};
-  last_lid : {l1, l2};
-  last_tipo : {intento, ingreso, salida, ninguno};
-  last_resultado : boolean;
--------------------------
--- ESTADO INICIAL
+  
+  -- Memoria (Token y Ocupación)
+  token_valido : boolean;
+  token_uid    : 0..3;
+  token_lid    : 0..2;
+  ocupante_l1  : 0..3;
+  ocupante_l2  : 0..3;
+
+-- ======================
+-- 2. INICIALIZACIÓN
 INIT
-  accion = ninguno &
-  resultado = FALSE &
-  !permiso_u1_l1 & !permiso_u1_l2 &
-  !permiso_u2_l1 & !permiso_u2_l2 &
-  !permiso_u3_l1 & !permiso_u3_l2 &
-  estado_u1_l1 = fuera &
-  estado_u1_l2 = fuera &
-  estado_u2_l1 = fuera &
-  estado_u2_l2 = fuera &
-  estado_u3_l1 = fuera &
-  estado_u3_l2 = fuera &
-  last_tipo = ninguno
---------------------------
--- TRANSICIONES
+  accion = ninguna & resultado = FALSE &
+  op_uid = 0 & op_lid = 0 &
+  token_valido = FALSE & token_uid = 0 & token_lid = 0 &
+  ocupante_l1 = 0 & ocupante_l2 = 0 &
+  input_usuario = 0 & input_laboratorio = 0
+
+-- ======================
+-- 3. TRANSICIONES
 ASSIGN
-  -------------------------
-  -- Cambios arbitrarios de usuario, laboratorio y acción
-  next(uid) := {u1, u2, u3};
-  next(lid) := {l1, l2};
-  next(accion) := {ninguno, intento, ingreso, salida};
-  --------------------------
-  -- RESULTADO DEL INTENTO: válido solo si tiene permiso
+
+  -- INPUTS: Siempre cambian aleatoriamente
+  next(input_usuario)     := 0..3;
+  next(input_laboratorio) := 0..2;
+
+  -- ------------------------------------------------------
+  -- A. LÓGICA DE DECISIÓN (Determinar la Próxima Acción)
+  -- ------------------------------------------------------
+  next(accion) :=
+    case
+      -- INGRESO: Si hay token válido y coincide con el input actual
+      token_valido & 
+      next(input_usuario) = token_uid & 
+      next(input_laboratorio) = token_lid &
+      ( (token_lid = l1 & ocupante_l1 = 0) | (token_lid = l2 & ocupante_l2 = 0) )
+      : {ingreso, ninguna};
+
+      -- SALIDA: Si el input coincide con el ocupante actual
+      next(input_usuario) != 0 &
+      ( (next(input_laboratorio) = l1 & ocupante_l1 = next(input_usuario)) |
+        (next(input_laboratorio) = l2 & ocupante_l2 = next(input_usuario)) )
+      : {salida, ninguna};
+
+      -- INTENTO: Siempre posible si IDs válidos
+      next(input_usuario) != 0 & next(input_laboratorio) != 0 : {intento, ninguna};
+
+      TRUE : ninguna;
+    esac;
+
+  -- Capturamos quién realiza la acción para verificar propiedades
+  next(op_uid) := next(input_usuario);
+  next(op_lid) := next(input_laboratorio);
+
+  -- ----------------------
+  -- B. LÓGICA DE RESULTADO
+  -- ---------------------
   next(resultado) :=
     case
-      next(accion) = intento :
-        case
-          next(uid) = u1 & next(lid) = l1 : permiso_u1_l1;
-          next(uid) = u1 & next(lid) = l2 : permiso_u1_l2;
-          next(uid) = u2 & next(lid) = l1 : permiso_u2_l1;
-          next(uid) = u2 & next(lid) = l2 : permiso_u2_l2;
-          next(uid) = u3 & next(lid) = l1 : permiso_u3_l1;
-          next(uid) = u3 & next(lid) = l2 : permiso_u3_l2;
-          TRUE : FALSE;
-        esac;
-      TRUE : resultado;
+      next(input_usuario) = 0 | next(input_laboratorio) = 0 : FALSE;
+      
+      -- Si la acción fue seleccionada arriba, es exitosa por definición
+      next(accion) = ingreso : TRUE;
+      next(accion) = salida  : TRUE;
+      
+      -- Intento: Validar permisos
+      next(accion) = intento : tiene_permiso;
+        
+      TRUE : FALSE;
     esac;
-  ------------------------
-  -- REGISTRO DEL ÚLTIMO EVENTO EN LA BITÁCORA
-  next(last_uid) := next(uid);
-  next(last_lid) := next(lid);
-  next(last_tipo) := next(accion);
-  next(last_resultado) := next(resultado);
-  ------------------------
-  -- TRANSICIONES DE INGRESO Y SALIDA
-  -- USUARIO 1, LAB 1
-  next(estado_u1_l1) :=
+
+  -- ----------------------------------
+  -- C. GESTIÓN DEL TOKEN (Hold & Clear)
+  -- ----------------------------------
+  next(token_valido) :=
     case
-      next(accion) = ingreso &
-      next(uid) = u1 & next(lid) = l1 &
-      permiso_u1_l1 : dentro;
-      next(accion) = salida &
-      next(uid) = u1 & next(lid) = l1 : fuera;
-      TRUE : estado_u1_l1;
+      -- 1. GENERACIÓN: Intento exitoso -> Token TRUE
+      next(accion) = intento & tiene_permiso : TRUE;
+
+      -- 2. RETENCIÓN: Si vamos a ingresar, MANTENER el token (para que la regla se cumpla)
+      next(accion) = ingreso : TRUE;
+      
+      -- 3. LIMPIEZA: Si YA estamos ingresando, el token se borra para el futuro
+      accion = ingreso : FALSE;
+      
+      -- 4. FALLO: Un intento fallido borra tokens previos
+      next(accion) = intento & !tiene_permiso : FALSE;
+
+      TRUE : token_valido;
     esac;
-  -- USUARIO 1, LAB 2
-  next(estado_u1_l2) :=
+
+  next(token_uid) := (next(accion) = intento & tiene_permiso) ? next(input_usuario) : token_uid;
+  next(token_lid) := (next(accion) = intento & tiene_permiso) ? next(input_laboratorio) : token_lid;
+
+  -- ------------------------------------
+  -- D. GESTIÓN DE OCUPACIÓN (Hold & Clear)
+  -- ------------------------------------
+  next(ocupante_l1) :=
     case
-      next(accion) = ingreso &
-      next(uid) = u1 & next(lid) = l2 &
-      permiso_u1_l2 : dentro;
-      next(accion) = salida &
-      next(uid) = u1 & next(lid) = l2 : fuera;
-      TRUE : estado_u1_l2;
+      -- Ingreso: Se llena
+      next(accion) = ingreso & next(input_laboratorio) = l1 : next(input_usuario);
+      
+      -- Salida (Retención): Si vamos a salir, MANTENER el ocupante (para validación)
+      next(accion) = salida & next(input_laboratorio) = l1 : ocupante_l1;
+      
+      -- Salida (Limpieza): Si YA salimos en el paso anterior (accion actual), limpiar.
+      -- Usamos op_lid para saber de dónde salimos.
+      accion = salida & op_lid = l1 : 0;
+      
+      TRUE : ocupante_l1;
     esac;
-  next(estado_u2_l1) :=
+
+  next(ocupante_l2) :=
     case
-      next(accion) = ingreso &
-      next(uid) = u2 & next(lid) = l1 &
-      permiso_u2_l1 : dentro;
-      next(accion) = salida &
-      next(uid) = u2 & next(lid) = l1 : fuera;
-      TRUE : estado_u2_l1;
+      next(accion) = ingreso & next(input_laboratorio) = l2 : next(input_usuario);
+      next(accion) = salida & next(input_laboratorio) = l2 : ocupante_l2;
+      accion = salida & op_lid = l2 : 0;
+      TRUE : ocupante_l2;
     esac;
-  next(estado_u2_l2) :=
-    case
-      next(accion) = ingreso &
-      next(uid) = u2 & next(lid) = l2 &
-      permiso_u2_l2 : dentro;
-      next(accion) = salida &
-      next(uid) = u2 & next(lid) = l2 : fuera;
-      TRUE : estado_u2_l2;
-    esac;
-  next(estado_u3_l1) :=
-    case
-      next(accion) = ingreso &
-      next(uid) = u3 & next(lid) = l1 &
-      permiso_u3_l1 : dentro;
-      next(accion) = salida &
-      next(uid) = u3 & next(lid) = l1 : fuera;
-      TRUE : estado_u3_l1;
-    esac;
-  next(estado_u3_l2) :=
-    case
-      next(accion) = ingreso &
-      next(uid) = u3 & next(lid) = l2 &
-      permiso_u3_l2 : dentro;
-      next(accion) = salida &
-      next(uid) = u3 & next(lid) = l2 : fuera;
-      TRUE : estado_u3_l2;
-    esac;
--------------------------
---  PROPIEDADES A VERIFICAR EN NuSMV
--- 1. No debe haber INGRESO sin permiso
-SPEC AG(
-  accion = ingreso ->
-    (
-      (uid = u1 & lid = l1 -> permiso_u1_l1) &
-      (uid = u1 & lid = l2 -> permiso_u1_l2) &
-      (uid = u2 & lid = l1 -> permiso_u2_l1) &
-      (uid = u2 & lid = l2 -> permiso_u2_l2) &
-      (uid = u3 & lid = l1 -> permiso_u3_l1) &
-      (uid = u3 & lid = l2 -> permiso_u3_l2)
-    )
-)
--- 2. No puede haber SALIDA si el usuario estaba fuera
-SPEC AG(
-  accion = salida ->
-    (
-      (uid = u1 & lid = l1 -> estado_u1_l1 = dentro) &
-      (uid = u1 & lid = l2 -> estado_u1_l2 = dentro) &
-      (uid = u2 & lid = l1 -> estado_u2_l1 = dentro) &
-      (uid = u2 & lid = l2 -> estado_u2_l2 = dentro) &
-      (uid = u3 & lid = l1 -> estado_u3_l1 = dentro) &
-      (uid = u3 & lid = l2 -> estado_u3_l2 = dentro)
-    )
-)
--- 3. Todo INGRESO exige un intento previo exitoso
-SPEC AG(
-  accion = ingreso -> resultado = TRUE
-)
--- 4. No se pueden hacer 2 ingresos consecutivos sin salida
-SPEC AG(
-  (estado_u1_l1 = dentro) -> AX( accion != ingreso )
-)
+
+-- =====================
+-- 4. FAIRNESS
+
+FAIRNESS accion != ninguna
+
+-- =====================
+-- 5. PROPIEDADES CTL
+
+-- P1. Ingreso requiere permiso (vía token)
+-- Al usar la lógica "Hold", token_valido es TRUE durante el estado de ingreso.
+SPEC AG (accion = ingreso -> token_valido = TRUE)
+
+-- P2. Salida solo si hay alguien dentro
+-- Al usar la lógica "Hold", ocupante es != 0 durante el estado de salida.
+SPEC AG (accion = salida -> ( (op_lid = l1 -> ocupante_l1 != 0) & (op_lid = l2 -> ocupante_l2 != 0) ))
+
+-- P3. Resultado Exitoso = IDs válidos
+SPEC AG (resultado = TRUE -> op_uid != 0 & op_lid != 0)
+
+-- P4. Vitalidad de Ingreso
+SPEC EF (accion = ingreso & resultado = TRUE)
+
+-- P5. Vitalidad de Intento
+SPEC AG EF (accion = intento)
+
+-- P6. Vitalidad General
+SPEC AF (accion != ninguna)

@@ -18,7 +18,7 @@ DEFINE
       next(input_usuario) = u2 & (next(input_laboratorio) = l1) : TRUE;
       TRUE : FALSE;
     esac;
--- ==================================================================
+-- =======================
 -- 1. VARIABLES
 
 VAR
@@ -39,9 +39,8 @@ VAR
   ocupante_l1  : 0..3;
   ocupante_l2  : 0..3;
 
--- ==================================================================
+-- ======================
 -- 2. INICIALIZACIÓN
--- ==================================================================
 INIT
   accion = ninguna & resultado = FALSE &
   op_uid = 0 & op_lid = 0 &
@@ -49,9 +48,8 @@ INIT
   ocupante_l1 = 0 & ocupante_l2 = 0 &
   input_usuario = 0 & input_laboratorio = 0
 
--- ==================================================================
+-- ======================
 -- 3. TRANSICIONES
--- ==================================================================
 ASSIGN
 
   -- INPUTS: Siempre cambian aleatoriamente
@@ -86,9 +84,9 @@ ASSIGN
   next(op_uid) := next(input_usuario);
   next(op_lid) := next(input_laboratorio);
 
-  -- ------------------------------------------------------
+  -- ----------------------
   -- B. LÓGICA DE RESULTADO
-  -- ------------------------------------------------------
+  -- ---------------------
   next(resultado) :=
     case
       next(input_usuario) = 0 | next(input_laboratorio) = 0 : FALSE;
@@ -103,9 +101,9 @@ ASSIGN
       TRUE : FALSE;
     esac;
 
-  -- ------------------------------------------------------
+  -- ----------------------------------
   -- C. GESTIÓN DEL TOKEN (Hold & Clear)
-  -- ------------------------------------------------------
+  -- ----------------------------------
   next(token_valido) :=
     case
       -- 1. GENERACIÓN: Intento exitoso -> Token TRUE
@@ -126,9 +124,9 @@ ASSIGN
   next(token_uid) := (next(accion) = intento & tiene_permiso) ? next(input_usuario) : token_uid;
   next(token_lid) := (next(accion) = intento & tiene_permiso) ? next(input_laboratorio) : token_lid;
 
-  -- ------------------------------------------------------
+  -- ------------------------------------
   -- D. GESTIÓN DE OCUPACIÓN (Hold & Clear)
-  -- ------------------------------------------------------
+  -- ------------------------------------
   next(ocupante_l1) :=
     case
       -- Ingreso: Se llena
@@ -152,12 +150,12 @@ ASSIGN
       TRUE : ocupante_l2;
     esac;
 
--- ==================================================================
+-- =====================
 -- 4. FAIRNESS
 
 FAIRNESS accion != ninguna
 
--- ==================================================================
+-- =====================
 -- 5. PROPIEDADES CTL
 
 -- P1. Ingreso requiere permiso (vía token)
