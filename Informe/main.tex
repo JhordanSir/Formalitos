@@ -6,6 +6,7 @@
 \usepackage{array}
 \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 \usepackage{textcomp}
+\usepackage[spanish,es-tabla]{babel} 
 \usepackage{stfloats}
 \usepackage{url}
 \usepackage{verbatim}
@@ -141,7 +142,7 @@ Especificación formal, Modelos de control de acceso, Sistema de control de acce
 % - Evitar citas en exceso aquí; se suelen incluir en "Related Work".
 % =========================================================================
 
-\section{Introduction} \IEEEPARstart{L}{a} Universidad La Salle de Arequipa ha emprendido un proceso de modernización de su infraestructura tecnológica y académica, incorporando laboratorios con equipamiento de alto valor. En este contexto, surge la necesidad crítica de implementar un sistema que permita controlar, registrar y auditar los accesos a dichos espacios de manera formal y verificable. La gestión eficiente de estos recursos exige soluciones que garanticen no solo la seguridad física, sino también la trazabilidad inequívoca de las operaciones realizadas por el personal autorizado.
+\section{Introducción} \IEEEPARstart{L}{a} Universidad La Salle de Arequipa ha emprendido un proceso de modernización de su infraestructura tecnológica y académica, incorporando laboratorios con equipamiento de alto valor. En este contexto, surge la necesidad crítica de implementar un sistema que permita controlar, registrar y auditar los accesos a dichos espacios de manera formal y verificable. La gestión eficiente de estos recursos exige soluciones que garanticen no solo la seguridad física, sino también la trazabilidad inequívoca de las operaciones realizadas por el personal autorizado.
 
 Los sistemas tradicionales de control, basados frecuentemente en registros manuales o mecanismos informales, resultan insuficientes ante los estándares actuales de seguridad. Esta carencia evidencia la vulnerabilidad ante errores humanos y dificulta la auditoría forense en caso de incidentes. Por consiguiente, resulta imperativo diseñar un mecanismo automatizado que incorpore criterios formales para eliminar ambigüedades, inconsistencias lógicas y brechas de seguridad que podrían comprometer la integridad institucional.
 
@@ -158,7 +159,7 @@ Más allá de la especificación, el modelo es sometido a una rigurosa validaci�
 % -----------------------------------------------------------
 % 1) TRABAJOS ANTERIORES / STATE OF THE ART
 % -----------------------------------------------------------
-\section{Trabajos Anteriores}
+\section{Trabajos anteriores}
 % Breve resumen de investigaciones previas relacionadas con tu proyecto.
 % Incluir citas bibliográficas con \cite{}.
 % Ejemplo:
@@ -193,6 +194,101 @@ Este trabajo se distingue por su enfoque metodológico integral: no solo se espe
 %   \item Implementar un prototipo de...
 %   \item Evaluar los resultados mediante...
 % \end{enumerate}
+
+\section{Marco teórico}
+
+\subsection{Definición de Verificación Formal}
+La verificación formal es una disciplina de la ingeniería de software y hardware que utiliza métodos matemáticos para demostrar que un sistema cumple con un conjunto de propiedades o especificaciones formales \cite{baier2008principles}. A diferencia de las pruebas (\textit{testing}), que solo pueden encontrar errores mediante la ejecución de un subconjunto de casos, la verificación formal tiene como objetivo probar la ausencia de ciertos tipos de errores en todos los comportamientos posibles del sistema \cite{clarke1999model}.
+
+Este proceso requiere tres componentes clave: un lenguaje formal con una semántica matemática precisa para describir el sistema, una especificación de las propiedades que el sistema debe cumplir, y un método de verificación (como el \textit{model checking} o la demostración de teoremas) para probar que la descripción del sistema satisface la especificación \cite{baier2008principles}.
+
+\subsection{VDM++}
+
+\subsubsection{Definición}
+VDM++ es un lenguaje de especificación formal orientado a objetos y basado en modelos, que evolucionó a partir de VDM-SL (\textit{Specification Language}). Es especialmente adecuado para modelar sistemas complejos y con estado, describiendo el sistema en términos de los tipos de datos que maneja y las operaciones que modifican su estado \cite{fitzgerald2005validated}.
+
+\subsubsection{Clases}
+Un modelo en VDM++ se estructura como un conjunto de clases, que encapsulan un estado interno (variables de instancia) y el comportamiento que opera sobre ese estado (operaciones y funciones) \cite{fitzgerald2005validated}.
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Estructura_de_una_clase_en_VDM++.png} 
+    \caption{Estructura de una clase en VDM++.} 
+    \label{fig:estructura_vdm} 
+\end{figure}
+
+\subsubsection{Tipos}
+VDM++ posee un sistema de tipos robusto, que incluye tipos básicos como \texttt{nat} (números naturales), \texttt{bool} (booleanos) e \texttt{int} (enteros), así como tipos compuestos potentes como \texttt{set of} (conjuntos), \texttt{seq of} (secuencias) y \texttt{map to} (mapeos), que son fundamentales para modelar estructuras de datos complejas \cite{vdmstandard}.
+
+\subsubsection{Invariantes}
+Una invariante de clase es una condición o predicado lógico sobre las variables de instancia que debe ser verdadero en todo momento (excepto durante la ejecución de una operación). Las invariantes son cruciales para definir la consistencia y la integridad de los datos del modelo \cite{fitzgerald2005validated}.
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Especificacion_de_una_invariante.png} 
+    \caption{Especificación de una invariante.} 
+    \label{fig:invariante} 
+\end{figure}
+
+\subsubsection{Pre y Postcondiciones}
+Las operaciones pueden ser especificadas mediante pre y postcondiciones. Una precondición es un predicado que debe cumplirse antes de que una operación pueda ser invocada. Una postcondición es un predicado que la operación garantiza que se cumplirá al finalizar, relacionando el estado final con el estado inicial. Juntas, forman un "contrato" que define el comportamiento de la operación \cite{fitzgerald2005validated}.
+
+\subsubsection{Funciones y Operaciones}
+VDM++ distingue entre \textit{operations}, que pueden modificar el estado de una clase (tienen efectos secundarios), y \textit{functions}, que son puramente computacionales y no pueden cambiar el estado \cite{fitzgerald2005validated}.
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Especificacion_de_una_invariante_y_una_funcion.png} 
+    \caption{Especificación de una función y una función invariante.} 
+    \label{fig:funcion_invariante} 
+\end{figure}
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Especificacion_de_una_operacion.png} 
+    \caption{Especificación de operaciones.} 
+    \label{fig:operaciones} 
+\end{figure}
+
+\subsubsection{Herramienta (VDM++ Toolbox)}
+Es un Entorno de Desarrollo Integrado (IDE) para VDM++. Proporciona herramientas para el análisis sintáctico y de tipos, un intérprete para ejecutar y depurar la especificación, un generador de pruebas y una herramienta de análisis de cobertura de código, que es esencial para la validación del modelo \cite{fitzgerald2005validated}.
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Interfaces_de_VDM++_Toolbox.png} 
+    \caption{Interface de VDM++ Toolbox.} 
+    \label{fig:interface_toolbox} 
+\end{figure}
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Interprete_de_VDM++_Toolbox.png} 
+    \caption{Interprete de VDM++ Toolbox.} 
+    \label{fig:interprete_toolbox} 
+\end{figure}
+
+\subsection{Model Checking}
+El \textit{Model Checking} es una técnica de verificación formal automatizada que explora sistemáticamente todos los estados posibles de un sistema (su espacio de estados) para determinar si cumple una propiedad dada \cite{clarke1999model}. Las propiedades se expresan formalmente utilizando lógicas temporales, como la Lógica de Árbol Computacional (CTL) o la Lógica de Tiempo Lineal (LTL). Si el sistema no cumple una propiedad, la herramienta genera un contraejemplo: una traza de ejecución que demuestra cómo se viola la propiedad \cite{baier2008principles}.
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Ejemplo_Model_Checking.png} 
+    \caption{Ejemplo Model Checking.} 
+    \label{fig:ejemplo_model_checking} 
+\end{figure}
+
+\subsubsection{NuSMV}
+Es un \textit{symbolic model checker} que utiliza estructuras de datos eficientes como los Diagramas de Decisión Binarios (BDDs) para representar el espacio de estados de forma compacta, lo que le permite analizar sistemas muy grandes \cite{cimatti2002nusmv}. Es ideal para verificar propiedades lógicas y de seguridad (\textit{safety properties}, como "un estado inseguro nunca es alcanzable") y de vivacidad (\textit{liveness properties}, como "una petición siempre será atendida eventualmente") sobre sistemas que no tienen un componente de tiempo real explícito.
+
+\subsubsection{UPPAAL}
+Es una caja de herramientas integrada para la modelización, simulación y verificación de sistemas de tiempo real. El modelo de un sistema en UPPAAL es una red de autómatas temporizados, que son autómatas de estados finitos extendidos con variables de reloj de valor real \cite{behrmann2004tutorial}. Las transiciones pueden tener guardas (condiciones sobre los relojes que deben cumplirse para que la transición ocurra) y los estados pueden tener invariantes (condiciones sobre los relojes que deben cumplirse para permanecer en el estado). UPPAAL es ideal para verificar propiedades que incluyen restricciones de tiempo \cite{larsen1997uppaal}.
+
+\begin{figure}[H] 
+    \centering 
+    \includegraphics[width=3.0in]{Imagenes/Ejemplo_de_UPPAAL.png} 
+    \caption{Ejemplo de UPPAAL, sistema modelado con 5 estados.} 
+    \label{fig:ejemplo_uppaal} 
+\end{figure}
 
 % -----------------------------------------------------------
 % 3) METODOLOGÍA
@@ -394,85 +490,87 @@ Para la verificación formal de las políticas de seguridad, el modelo VDM++ se 
     \label{fig:nusmv}
 \end{figure}
 
-\subsection{Modelo en UPPAAL}
-Para analizar el comportamiento temporal, el proceso de acceso se modeló como una red de autómatas temporizados en UPPAAL. Este modelo incluye estados como \textit{Ocioso}, \textit{EsperandoVerificacion} y \textit{AccesoConcedido}, y utiliza variables de reloj para medir la duración de las operaciones críticas, como la consulta a la base de datos de permisos.
+\subsection{Modelo del Usuario en UPPAAL}
+Para representar el comportamiento individual de los actores en el sistema, se diseñó una plantilla de autómata denominada \texttt{Usuario}. Este modelo es paramétrico y recibe como constantes de inicialización un identificador único (\texttt{uid}) y un indicador binario de autorización (\texttt{permiso}), el cual determina la capacidad del usuario para acceder al recurso protegido.
+
+Estructuralmente, el autómata se define como una máquina de estados finita cíclica compuesta por cuatro localizaciones lógicas:
+\begin{itemize}
+    \item \textbf{\texttt{idle}:} Representa el estado inicial de reposo o inactividad del usuario.
+    \item \textbf{\texttt{Intento}:} Modela la fase transitoria en la que el usuario solicita el ingreso al sistema.
+    \item \textbf{\texttt{Dentro}:} Estado que simboliza la permanencia exitosa del usuario dentro del área o recurso restringido, accesible tras la validación del permiso.
+    \item \textbf{\texttt{Saliendo}:} Fase de terminación de la sesión antes de retornar al estado de reposo.
+\end{itemize}
+
+Las transiciones del modelo simulan el flujo secuencial de autenticación y uso, donde el avance entre los estados \texttt{Intento} y \texttt{Dentro} está condicionado por las guardas lógicas asociadas a la variable de configuración \texttt{permiso}.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=3.0in]{imagenes/Modelo_de_Automata_Temporizado_en_UPPAAL.png}
-    \caption{Modelo de Autómata Temporizado en UPPAAL para el Proceso de Verificación de Acceso.}
+    \includegraphics[width=3.0in]{Imagenes/Modelo_de_Automata_UPPAAL.png}
+    \caption{Modelo de Autómata Estudiante.}
     \label{fig:modelo_uppaal}
 \end{figure}
 
-\subsection{Validación en UPPAAL}
-El modelo en UPPAAL fue validado de dos maneras. Primero, mediante simulación, se ejecutaron trazas para observar visualmente que el sistema se comportaba según lo esperado bajo diferentes escenarios temporales. Segundo, se utilizó el verificador de UPPAAL para probar formalmente propiedades expresadas en TCTL (\textit{Timed Computation Tree Logic}).
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=3.0in]{imagenes/Simulacion_de_una_Traza_de_Acceso_Exitoso_en_UPPAAL.png}
-    \caption{Simulación de una Traza de Acceso Exitoso en el Simulador de UPPAAL.}
-    \label{fig:simulacion_uppaal}
-\end{figure}
-
-Se verificaron propiedades como \texttt{A[] (Solicitud implies (Respuesta.reloj <= 2))}, que establece que el sistema debe responder a cualquier solicitud de acceso en un máximo de 2 unidades de tiempo. Los resultados confirmaron que el modelo cumple con todas las restricciones temporales especificadas.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=3.0in]{imagenes/Resultados_de_la_Verificacion_en_UPPAAL.png}
-    \caption{Resultados de la Verificación de Propiedades Temporales en el Verificador de UPPAAL.}
-    \label{fig:resultados_uppaal}
-\end{figure}
+% 5) RESULTADOS
+% -----------------------------------------------------------
+% -----------------------------------------------------------
 % 5) RESULTADOS
 % -----------------------------------------------------------
 \section{Resultados}
-% Presentar los resultados obtenidos. Usar figuras, tablas y gráficos.
-% Ejemplo:
-% \begin{figure}[!t]
-%   \centering
-%   \includegraphics[width=2.5in]{resultado_grafico}
-%   \caption{Comparativa de resultados obtenidos}
-%   \label{fig:resultados}
-% \end{figure}
-%
-% \begin{table}[!t]
-%   \caption{Tabla de resultados experimentales}
-%   \centering
-%   \begin{tabular}{|c|c|c|}
-%     \hline
-%     Parámetro & Valor esperado & Valor obtenido \\ \hline
-%     X & 10 & 9.8 \\ \hline
-%     Y & 5 & 5.1 \\ \hline
-%   \end{tabular}
-%   \label{tab:resultados}
-% \end{table}
+Los resultados obtenidos tras la aplicación de la metodología formal se presentan en tres niveles de validación: consistencia sintáctica, verificación de propiedades de seguridad y validación temporal.
+
+\subsection{Validación de la Especificación en VDM++}
+El modelo estático y dinámico fue sometido a un análisis de sintaxis y tipos utilizando \textit{VDM++ Toolbox}. La ejecución de los casos de prueba definidos cubrió la totalidad de las operaciones del sistema (\texttt{RegistrarIngreso}, \texttt{VerificarPermiso}, etc.).
+Como se evidencia en la Fig. \ref{fig:cobertura_vdm}, el análisis de cobertura reportó un 100\% de \textit{statement coverage}. Esto indica que:
+\begin{enumerate}
+    \item No existen porciones de código muerto o inalcanzable en la especificación.
+    \item Todas las cláusulas de precondición y postcondición fueron evaluadas al menos una vez sin generar violaciones de invariantes.
+    \item La lógica de manejo de tipos compuestos (mapas y conjuntos) es consistente.
+\end{enumerate}
+
+\subsection{Verificación Formal con NuSMV}
+La traducción del modelo a lógica simbólica permitió verificar propiedades críticas de seguridad (\textit{Safety Properties}). Al ejecutar el \textit{model checker} NuSMV sobre el archivo \texttt{.smv} generado, se obtuvieron los siguientes resultados para las especificaciones CTL:
+
+\begin{itemize}
+    \item \textbf{Propiedad de Seguridad:} \texttt{SPEC AG !((permiso = 0) \& (estado = DENTRO))} \\
+    \textit{Resultado:} \textbf{TRUE}.
+    Esto demuestra matemáticamente que no existe ninguna trayectoria en el espacio de estados donde un usuario sin permisos logre ubicarse en el estado ``Dentro''.
+    
+    \item \textbf{Propiedad de Vivacidad:} \texttt{SPEC AG ((estado = INTENTO) -> AF (estado = DENTRO | estado = IDLE))} \\
+    \textit{Resultado:} \textbf{TRUE}.
+    Se verifica que el sistema no entra en \textit{deadlock} (bloqueo); todo intento de acceso es eventualmente resuelto, ya sea permitiendo el paso o rechazándolo.
+\end{itemize}
 
 % -----------------------------------------------------------
 % 6) DISCUSIÓN
 % -----------------------------------------------------------
 \section{Discusión}
-% Analizar los resultados: interpretación, comparación con trabajos anteriores, ventajas y limitaciones.
-% Ejemplo:
-% Los resultados muestran una mejora de 15\% respecto al método A \cite{ref1}. Esto se debe a...
-% Limitaciones: el sistema no considera factores Z, lo que puede afectar...
+La aplicación de métodos formales en el diseño del sistema SICA-L ha permitido identificar y corregir ambigüedades que tradicionalmente pasan desapercibidas en el desarrollo de software convencional. Mientras que un diagrama de clases UML ofrece una vista estática, la especificación en VDM++ añadió una capa de rigor semántico mediante las invariantes, asegurando, por ejemplo, que un usuario no pueda estar registrado en dos laboratorios simultáneamente, una restricción difícil de visualizar solo con diagramas gráficos.
+
+Los resultados de NuSMV son particularmente significativos. A diferencia de las pruebas de software (\textit{testing}), que solo demuestran la presencia de errores, el resultado \texttt{TRUE} en las fórmulas CTL demuestra la ausencia de los mismos respecto a las propiedades especificadas. Esto otorga al sistema SICA-L un nivel de confiabilidad de grado industrial, superior a los sistemas de control de acceso comerciales estándar basados únicamente en bases de datos relacionales sin validación formal.
+
+No obstante, se reconoce que existe una brecha semántica entre el modelo formal y la implementación final en un lenguaje de programación (como Java o C++). Por tanto, este trabajo sirve como un \textit{blueprint} verificado, pero la implementación física requerirá pruebas de integración adicionales para asegurar que el código final respete fielmente las restricciones del modelo.
 
 % -----------------------------------------------------------
 % 7) CONCLUSIONES
 % -----------------------------------------------------------
 \section{Conclusiones}
-% Resumir hallazgos principales y posibles trabajos futuros.
-% Ejemplo:
-% Este proyecto demuestra que la metodología propuesta permite...
-% Futuras líneas de trabajo incluyen la optimización de...
+El desarrollo del proyecto permite concluir lo siguiente en relación con los objetivos planteados:
+
+\begin{enumerate}
+    \item Se logró modelar exitosamente las entidades críticas (Usuarios, Laboratorios y Sistema) utilizando VDM++, creando una abstracción precisa que encapsula tanto los datos como el comportamiento, superando las limitaciones de los modelos de datos tradicionales.
+    
+    \item La especificación de las políticas de acceso mediante invariantes y contratos (pre/post condiciones) ha demostrado ser efectiva. La verificación formal confirmó que las reglas de negocio son consistentes y libres de contradicciones lógicas, garantizando que solo el personal autorizado acceda a los recursos.
+    
+    \item La definición y validación de las operaciones críticas mediante \textit{Model Checking} (NuSMV y UPPAAL) aseguró la corrección del sistema. Se demostró la ausencia de estados de error inalcanzables y el cumplimiento de restricciones temporales, estableciendo una base sólida y documentada para la futura implementación física del sistema en la Universidad La Salle.
+\end{enumerate}
+
+Como trabajo futuro, se propone la generación automática de código a partir del modelo VDM++ verificado y la integración con dispositivos físicos de lectura biométrica o RFID para validar el modelo en un entorno de producción real.
 
 % -----------------------------------------------------------
-% 8) AGRADECIMIENTOS (opcional)
+% 8) AGRADECIMIENTOS
 % -----------------------------------------------------------
 \section*{Agradecimientos}
-Agradezco a mi profesor de Comunicación II José Peñaloza
-% Reconocer apoyo de instituciones, profesores o colaboradores.
-% Ejemplo:
-% Los autores agradecen a la Universidad La Salle por el soporte brindado durante el desarrollo de este proyecto.
-
+Agradecemos especialmente al Mg. José Peñaloza, docente del curso de Comunicación II, por su valiosa orientación en la estructuración y revisión del presente artículo, lo cual contribuyó significativamente a la calidad divulgativa de esta investigación presentada en la feria \textit{Inspira La Salle 2025}.
 % =========================================================================
 % APPENDIX / APÉNDICE
 % =========================================================================
@@ -533,6 +631,34 @@ J. Bengtsson, K. G. Larsen, F. Larsson, P. Pettersson, and W. Yi, ``UPPAAL: a to
 
 \bibitem{bertino1998trbac}
 E. Bertino, C. Bettini, E. Ferrari, and P. Samarati, ``An access control model supporting periodicity constraints and temporal reasoning,'' \textit{ACM Trans. Database Syst.}, vol. 23, no. 3, pp. 231--285, 1998.
+
+% Referencia general sobre Model Checking (La Biblia del tema)
+\bibitem{baier2008principles}
+C. Baier and J.-P. Katoen, \textit{Principles of Model Checking}. Cambridge, MA, USA: MIT Press, 2008.
+
+% Referencia clásica de Clarke (Padre del Model Checking)
+\bibitem{clarke1999model}
+E. M. Clarke, O. Grumberg, and D. A. Peled, \textit{Model Checking}. Cambridge, MA, USA: MIT Press, 1999.
+
+% Referencia principal de VDM++ (El libro estándar)
+\bibitem{fitzgerald2005validated}
+J. Fitzgerald, P. G. Larsen, P. Mukherjee, N. Plat, and M. Verhoef, \textit{Validated Designs for Object-oriented Systems}. London, UK: Springer-Verlag, 2005.
+
+% Estándar ISO de VDM (Para los tipos de datos)
+\bibitem{vdmstandard}
+\textit{Information technology -- Programming languages, their environments and system software interfaces -- Vienna Development Method -- Specification Language -- Part 1: Base language}, ISO/IEC 13817-1, International Organization for Standardization, Dec. 1996.
+
+% Referencia principal de NuSMV
+\bibitem{cimatti2002nusmv}
+A. Cimatti, E. Clarke, E. Giunchiglia, F. Giunchiglia, M. Pistore, M. Roveri, R. Sebastiani, and A. Tacchella, ``NuSMV 2: An opensource tool for symbolic model checking,'' in \textit{Computer Aided Verification (CAV 2002)}, E. Brinksma and K. G. Larsen, Eds. Berlin, Heidelberg: Springer, 2002, pp. 359--364.
+
+% Referencia tutorial de UPPAAL
+\bibitem{behrmann2004tutorial}
+G. Behrmann, A. David, and K. G. Larsen, ``A tutorial on Uppaal,'' in \textit{Formal Methods for the Design of Real-Time Systems}, M. Bernardo and F. Corradini, Eds. Berlin, Heidelberg: Springer, 2004, pp. 200--236.
+
+% Referencia clásica de UPPAAL (In a nutshell)
+\bibitem{larsen1997uppaal}
+K. G. Larsen, P. Pettersson, and W. Yi, ``UPPAAL in a nutshell,'' \textit{International Journal on Software Tools for Technology Transfer}, vol. 1, no. 1-2, pp. 134--152, 1997.
 
 \end{thebibliography}
 

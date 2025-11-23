@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC "-//Uppaal Team//DTD Flat System 1.1//EN" "http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd">
+<nta>
+  <declaration>
+// Global declarations
+const int N_USERS = 3;
+const int N_LABS = 2;
+
+int req_uid = 0; // user id used to pass data with intento!
+int req_lid = 0; // lab id used to pass data with intento!
+
+// permission matrix (indexed 1..N_USERS, 1..N_LABS)
+// We'll initialize these in the Controller init transition
+bool perm[4][3]; // small extra sizes for 1-based indexing
+
+// occupancy: 0 = free, otherwise uid
+int ocupante[3]; // index 1..N_LABS
+
+</declaration>
+
+  <!-- Template: User -->
+  <template>
+    <name>User</name>
+    <parameter>int uid</parameter>
+    <declaration>
+int lid_choice = 1; // default lab choice; Environment can change req_lid directly
+    </declaration>
+    <location id="id0"><name x="128" y="64">Idle</name></location>
+    <location id="id1"><name x="128" y="192">Requesting</name></location>
+    <location id="id2"><name x="320" y="192">Waiting</name></location>
+    <location id="id3"><name x="512" y="192">Entering</name></location>
+    <location id="id4"><name x="512" y="320">Inside</name></location>
+    <location id="id5"><name x="320" y="320">Exiting</name></location>
+    <init ref="id0"/>
+    <!-- Idle -> Requesting : prepare request and sync intento! -->
+    <transition>
+      <source ref="id0"/>
+      <target ref="id1"/>
+      <label kind="assignment">req_uid = uid, req_lid = lid_choice</label>
+      <label kind="synchronisation">intento!</label>
+    </transition>
+    <!-- Requesting -> Waiting : after sending intento (controller responds permit/deny) -->
+    <transition>
+      <source ref="id1"/>
+      <target ref="id2"/>
+    </transition>
+    <!-- Waiting -> Entering : on permit? (controller indicates permit) -->
+    <transition>
+      <source ref="id2"/>
+      <target ref="id3"/>
+      <label kind="synchronisation">permit?</label>
+    </transition>
+    <!-- Waiting -> Idle : on deny? -->
+    <transition>
+      <source ref="id2"/>
+      <target ref="id0"/>
+      <label kind="synchronisation">deny?</label>
+    </transition>
+    <!-- Entering -> Inside : synchronize ingreso! to lab -->
+    <transition>
+      <source ref="id3"/>
+      <target ref="id4"/>
+      <label kind="synchronisation">ingreso!</label>
+    </transition>
+    <!-- Inside -> Exiting : user decides to exit, sync salida! -->
+    <transition>
+      <source ref="id4"/>
+      <target ref="id5"/>
+      <label kind="synchronisation">salida!</label>
+    </transition>
+    <!-- Exiting -> Idle : finalize exit after lab processes salida? -->
+    <transition>
+      <source ref="id5"/>
+      <target ref="id0"/>
+    </transition>
+  </template>
+
+  <!-- Template: Controller -->
+  <template>
+    <name>Controller</name>
+    <declaration>
+    </declaration>
+    <location id="c0"><name x="128" y="64">Idle</name></location>
+    <location id="c1"><name x="320" y="64">Processing</name></location>
+    <init ref="c0"/>
+    <!-- on intento? read req_uid/req_lid and reply permit!/deny! -->
+    <transition>
+      <source ref="c0"/>
+      <target ref="c1"/>
+      <label kind="synchronisation">intento?</label>
+      <label kind="assignment">
+// initialize perms deterministically (one-time effect in this model)
+perm[1][1] = true;
+perm[1][2] = true;
+perm[2][1] = true;
+perm[2][2] = false;
+perm[3][1] = false;
+perm[3][2] = false;
+      </label>
+    </transition>
+    <transition>
+      <source ref="c1"/>
+      <target ref="c0"/>
+      <label kind="guard">perm[req_uid][req_lid] &amp;&amp; ocupante[req_lid] == 0</label>
+      <label kind="synchronisation">permit!</label>
+    </transition>
+    <transition>
+      <source ref="c1"/>
+      <target ref="c0"/>
+      <label kind="guard">!perm[req_uid][req_lid] || ocupante[req_lid] != 0</label>
+      <label kind="synchronisation">deny!</label>
+    </transition>
+  </template>
+
+  <!-- Template: Lab1 -->
+  <template>
+    <name>Lab1</name>
+    <declaration>const int lid = 1;</declaration>
+    <location id="l10"><name x="128" y="64">Free</name></location>
+    <location id="l11"><name x="320" y="64">Occupied</name></location>
+    <init ref="l10"/>
+    <!-- on ingreso? occupy if free -->
+    <transition>
+      <source ref="l10"/>
+      <target ref="l11"/>
+      <label kind="synchronisation">ingreso?</label>
+      <label kind="assignment">ocupante[lid] = req_uid</label>
+    </transition>
+    <!-- on salida? free if the same uid -->
+    <transition>
+      <source ref="l11"/>
+      <target ref="l10"/>
+      <label kind="synchronisation">salida?</label>
+      <label kind="guard">ocupante[lid] == req_uid</label>
+      <label kind="assignment">ocupante[lid] = 0</label>
+    </transition>
+  </template>
+
+  <!-- Template: Lab2 -->
+  <template>
+    <name>Lab2</name>
+    <declaration>const int lid = 2;</declaration>
+    <location id="l20"><name x="128" y="64">Free</name></location>
+    <location id="l21"><name x="320" y="64">Occupied</name></location>
+    <init ref="l20"/>
+    <transition>
+      <source ref="l20"/>
+      <target ref="l21"/>
+      <label kind="synchronisation">ingreso?</label>
+      <label kind="assignment">ocupante[lid] = req_uid</label>
+    </transition>
+    <transition>
+      <source ref="l21"/>
+      <target ref="l20"/>
+      <label kind="synchronisation">salida?</label>
+      <label kind="guard">ocupante[lid] == req_uid</label>
+      <label kind="assignment">ocupante[lid] = 0</label>
+    </transition>
+  </template>
+
+  <!-- Template: Environment (optional, drives different lid choices) -->
+  <template>
+    <name>Env</name>
+    <declaration>int step = 0;</declaration>
+    <location id="e0"><name x="128" y="64">Start</name></location>
+    <location id="e1"><name x="320" y="64">Drive</name></location>
+    <init ref="e0"/>
+    <transition>
+      <source ref="e0"/>
+      <target ref="e1"/>
+      <label kind="assignment">req_uid = 1, req_lid = 1</label>
+    </transition>
+    <transition>
+      <source ref="e1"/>
+      <target ref="e1"/>
+      <label kind="assignment">req_uid = (req_uid % 3) + 1, req_lid = (req_lid % 2) + 1</label>
+    </transition>
+  </template>
+
+  <!-- System instantiation -->
+  <system>
+    User1 = User(1);
+    User2 = User(2);
+    User3 = User(3);
+    C = Controller();
+    L1 = Lab1();
+    L2 = Lab2();
+    E = Env();
+    system User1, User2, User3, C, L1, L2, E;
+  </system>
+
+  <!-- Queries: examples you can run in the verifier -->
+  <queries>
+    <query>
+      <formula>A[] not deadlock</formula>
+      <comment>System has no deadlock</comment>
+    </query>
+    <query>
+      <formula>E<> User1.Inside</formula>
+      <comment>User1 can eventually get inside</comment>
+    </query>
+    <query>
+      <formula>A[] (User1.Inside imply ocupante[1] == 1)</formula>
+      <comment>If User1 is inside Lab1, ocupante[1] must be 1</comment>
+    </query>
+  </queries>
+</nta>

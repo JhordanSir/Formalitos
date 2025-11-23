@@ -1,255 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
-	<declaration>
-// ==========================================
-// CONSTANTES Y TIPOS
-// ==========================================
-const int U1 = 1;
-const int U2 = 2;
-const int U3 = 3;
-
-const int L1 = 1;
-const int L2 = 2;
-
-// Rangos para iteradores
-typedef int[1,3] id_u;
-typedef int[1,2] id_l;
-
-// ==========================================
-// VARIABLES GLOBALES COMPARTIDAS
-// ==========================================
-// Se usan para pasar datos durante la sincronización
-int share_uid;
-int share_lid;
-
-// Estado de ocupación de los laboratorios (0=Libre, >0=ID Usuario)
-int ocupante[3] = {0, 0, 0};
-
-// ==========================================
-// CANALES DE SINCRONIZACIÓN
-// ==========================================
-chan intento;       // Usuario -> Controlador (Pide acceso)
-chan grant[4];      // Controlador -> Usuario específico (Permiso OK)
-chan deny[4];       // Controlador -> Usuario específico (Permiso NO)
-chan enter[3];      // Usuario -> Laboratorio (Ingreso físico)
-chan leave[3];      // Usuario -> Laboratorio (Salida física)
-
-// ==========================================
-// MATRIZ DE PERMISOS (Lógica de Negocio)
-// ==========================================
-// indices: [usuario][laboratorio]
-// u1(1) -> l1, l2
-// u2(2) -> l1
-// u3(3) -> ninguno
-const bool permisos[4][3] = {
-  {false, false, false}, // dummy u0
-  {false, true,  true},  // u1
-  {false, true,  false}, // u2
-  {false, false, false}  // u3
-};
+	<declaration>// Place global declarations here.
+int [1,2] turn;
 </declaration>
-
-	<!-- ==================================================== -->
-	<!-- TEMPLATE: USUARIO                                    -->
-	<!-- ==================================================== -->
 	<template>
 		<name x="5" y="5">Usuario</name>
-		<parameter>const id_u uid</parameter>
-		<declaration>
-// Variable local para recordar qué laboratorio se eligió
-int target_lid = 0;
-		</declaration>
-		
-		<location id="id0" x="-400" y="-200">
-			<name x="-410" y="-230">Idle</name>
+		<parameter>const int uid, const int[0,1] permiso</parameter>
+		<declaration>// Place local declarations here.
+</declaration>
+		<location id="id0" x="-357" y="8">
+			<name x="-367" y="-26">idle</name>
 		</location>
-		<location id="id1" x="-200" y="-200">
-			<name x="-230" y="-230">Solicitando</name>
+		<location id="id1" x="-59" y="0">
+			<name x="-85" y="-42">Intento</name>
 		</location>
-		<location id="id2" x="0" y="-200">
-			<name x="-25" y="-230">PermisoConcedido</name>
-			<label kind="comments" x="-30" y="-170">Token Válido</label>
+		<location id="id2" x="119" y="0">
+			<name x="109" y="-34">Dentro</name>
 		</location>
-		<location id="id3" x="200" y="-200">
-			<name x="190" y="-230">Dentro</name>
+		<location id="id3" x="246" y="0">
+			<name x="254" y="-42">Saliendo</name>
 		</location>
-
 		<init ref="id0"/>
-
-		<!-- 1. INTENTO: Elige lab, escribe en variables globales y avisa -->
-		<transition>
-			<source ref="id0"/>
-			<target ref="id1"/>
-			<select>lid : id_l</select>
-			<label kind="assignment">share_uid = uid,
-share_lid = lid,
-target_lid = lid</label>
-			<label kind="synchronisation">intento!</label>
-		</transition>
-
-		<!-- 2a. PERMISO OK: Recibe confirmación específica para su ID -->
-		<transition>
-			<source ref="id1"/>
-			<target ref="id2"/>
-			<label kind="synchronisation">grant[uid]?</label>
-		</transition>
-
-		<!-- 2b. PERMISO DENEGADO: Recibe rechazo -->
-		<transition>
+		<transition id="id4">
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<label kind="synchronisation">deny[uid]?</label>
-			<nail x="-300" y="-120"/>
+			<label kind="guard" x="-229" y="-85">permiso == 0</label>
+			<nail x="-187" y="-59"/>
 		</transition>
-
-		<!-- 3. INGRESO: Entra físicamente al laboratorio -->
-		<transition>
-			<source ref="id2"/>
-			<target ref="id3"/>
-			<label kind="synchronisation">enter[target_lid]!</label>
-		</transition>
-
-		<!-- 4. SALIDA: Sale del laboratorio -->
-		<transition>
+		<transition id="id5">
 			<source ref="id3"/>
 			<target ref="id0"/>
-			<label kind="synchronisation">leave[target_lid]!</label>
-			<nail x="-100" y="-120"/>
+			<nail x="-8" y="136"/>
+		</transition>
+		<transition id="id6">
+			<source ref="id2"/>
+			<target ref="id3"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id1"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-17" y="-25">permiso == 1</label>
+		</transition>
+		<transition id="id8">
+			<source ref="id0"/>
+			<target ref="id1"/>
+			<nail x="-119" y="0"/>
 		</transition>
 	</template>
+	<system>// Place template instantiations here.
+u1 = Usuario(1,1);
+u2 = Usuario(2,0);
 
-	<!-- ==================================================== -->
-	<!-- TEMPLATE: CONTROLADOR (Cerebro)                      -->
-	<!-- ==================================================== -->
-	<template>
-		<name>Controlador</name>
-		<declaration>
-int current_u;
-int current_l;
-		</declaration>
-		
-		<location id="id4" x="-200" y="0">
-			<name x="-210" y="-30">Idle</name>
-		</location>
-		<location id="id5" x="0" y="0">
-			<name x="-10" y="-30">Procesando</name>
-			<label kind="comments" x="-40" y="35">Estado Comprometido
-(Atomicidad)</label>
-			<committed/>
-		</location>
-
-		<init ref="id4"/>
-
-		<!-- Recibir solicitud y copiar variables globales a locales -->
-		<transition>
-			<source ref="id4"/>
-			<target ref="id5"/>
-			<label kind="synchronisation">intento?</label>
-			<label kind="assignment">current_u = share_uid,
-current_l = share_lid</label>
-		</transition>
-
-		<!-- CASO 1: Tiene Permiso -> Enviar Grant -->
-		<transition>
-			<source ref="id5"/>
-			<target ref="id4"/>
-			<label kind="guard">permisos[current_u][current_l] == true</label>
-			<label kind="synchronisation">grant[current_u]!</label>
-			<nail x="-100" y="-60"/>
-		</transition>
-
-		<!-- CASO 2: No tiene Permiso -> Enviar Deny -->
-		<transition>
-			<source ref="id5"/>
-			<target ref="id4"/>
-			<label kind="guard">permisos[current_u][current_l] == false</label>
-			<label kind="synchronisation">deny[current_u]!</label>
-			<nail x="-100" y="60"/>
-		</transition>
-	</template>
-
-	<!-- ==================================================== -->
-	<!-- TEMPLATE: LABORATORIO (Recurso)                      -->
-	<!-- ==================================================== -->
-	<template>
-		<name>Laboratorio</name>
-		<parameter>const id_l lid</parameter>
-		
-		<location id="id6" x="-200" y="0">
-			<name x="-210" y="-30">Libre</name>
-		</location>
-		<location id="id7" x="0" y="0">
-			<name x="-10" y="-30">Ocupado</name>
-		</location>
-
-		<init ref="id6"/>
-
-		<!-- Ingreso: Solo si está libre -->
-		<transition>
-			<source ref="id6"/>
-			<target ref="id7"/>
-			<label kind="synchronisation">enter[lid]?</label>
-			<!-- UPPAAL sabe quién entra porque el canal está sincronizado con el usuario -->
-			<label kind="assignment">ocupante[lid] = 1</label> 
-		</transition>
-
-		<!-- Salida -->
-		<transition>
-			<source ref="id7"/>
-			<target ref="id6"/>
-			<label kind="synchronisation">leave[lid]?</label>
-			<label kind="assignment">ocupante[lid] = 0</label>
-		</transition>
-	</template>
-
-	<!-- ==================================================== -->
-	<!-- SISTEMA                                              -->
-	<!-- ==================================================== -->
-	<system>
-// Instancias de Usuarios
-U_1 = Usuario(U1);
-U_2 = Usuario(U2);
-U_3 = Usuario(U3);
-
-// Instancias de Laboratorios
-Lab_1 = Laboratorio(L1);
-Lab_2 = Laboratorio(L2);
-
-// Instancia del Controlador
-Ctrl = Controlador();
-
-// Definición del sistema
-system U_1, U_2, U_3, Lab_1, Lab_2, Ctrl;
-	</system>
-
-	<!-- ==================================================== -->
-	<!-- VERIFICACIÓN (Queries equivalentes a NuSMV)          -->
-	<!-- ==================================================== -->
+// List one or more processes to be composed into a system.
+system u1, u2;
+</system>
 	<queries>
 		<query>
-			<formula>A[] (U_3.Dentro imply false)</formula>
-			<comment>P1 (Equivalente): El Usuario 3 nunca puede llegar al estado 'Dentro' (porque no tiene permisos).</comment>
-		</query>
-		<query>
-			<formula>A[] (U_1.Dentro imply (ocupante[U_1.target_lid] != 0))</formula>
-			<comment>P2 (Consistencia): Si U1 está dentro, el laboratorio registra ocupación.</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; (U_1.Dentro and U_1.target_lid == 1)</formula>
-			<comment>P4 (Vitalidad): Es posible que U1 entre al Lab 1.</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; (U_2.Dentro and U_2.target_lid == 1)</formula>
-			<comment>P4 (Vitalidad): Es posible que U2 entre al Lab 1.</comment>
-		</query>
-		<query>
-			<formula>A[] not (U_2.Dentro and U_2.target_lid == 2)</formula>
-			<comment>Seguridad: U2 nunca puede estar dentro del Lab 2.</comment>
-		</query>
-		<query>
-			<formula>A[] not deadlock</formula>
-			<comment>P6 (Progreso): El sistema nunca se bloquea por completo.</comment>
+			<formula/>
+			<comment/>
 		</query>
 	</queries>
 </nta>
