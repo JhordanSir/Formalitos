@@ -1,16 +1,13 @@
 MODULE main
 -- ==================================================================
 -- 0. CONSTANTES Y DEFINICIONES
-
 DEFINE
   u1 := 1; u2 := 2; u3 := 3;
   l1 := 1; l2 := 2;
-  
   ninguna := 0;
   intento := 1;
   ingreso := 2;
   salida  := 3;
-
   -- Matriz de Permisos
   tiene_permiso := 
     case
@@ -20,25 +17,21 @@ DEFINE
     esac;
 -- =======================
 -- 1. VARIABLES
-
 VAR
   -- Inputs (Aleatorios en cada paso)
   input_usuario     : 0..3; 
   input_laboratorio : 0..2;
-  
   -- Estado de la Operación Actual (Congela los inputs para la acción)
   accion : 0..3;
   op_uid : 0..3; -- ID del usuario ejecutando la acción actual
   op_lid : 0..2; -- ID del lab de la acción actual
   resultado : boolean;
-  
   -- Memoria (Token y Ocupación)
   token_valido : boolean;
   token_uid    : 0..3;
   token_lid    : 0..2;
   ocupante_l1  : 0..3;
   ocupante_l2  : 0..3;
-
 -- ======================
 -- 2. INICIALIZACIÓN
 INIT
@@ -47,15 +40,12 @@ INIT
   token_valido = FALSE & token_uid = 0 & token_lid = 0 &
   ocupante_l1 = 0 & ocupante_l2 = 0 &
   input_usuario = 0 & input_laboratorio = 0
-
 -- ======================
 -- 3. TRANSICIONES
 ASSIGN
-
   -- INPUTS: Siempre cambian aleatoriamente
   next(input_usuario)     := 0..3;
   next(input_laboratorio) := 0..2;
-
   -- ------------------------------------------------------
   -- A. LÓGICA DE DECISIÓN (Determinar la Próxima Acción)
   -- ------------------------------------------------------
@@ -67,40 +57,31 @@ ASSIGN
       next(input_laboratorio) = token_lid &
       ( (token_lid = l1 & ocupante_l1 = 0) | (token_lid = l2 & ocupante_l2 = 0) )
       : {ingreso, ninguna};
-
       -- SALIDA: Si el input coincide con el ocupante actual
       next(input_usuario) != 0 &
       ( (next(input_laboratorio) = l1 & ocupante_l1 = next(input_usuario)) |
         (next(input_laboratorio) = l2 & ocupante_l2 = next(input_usuario)) )
       : {salida, ninguna};
-
       -- INTENTO: Siempre posible si IDs válidos
       next(input_usuario) != 0 & next(input_laboratorio) != 0 : {intento, ninguna};
-
       TRUE : ninguna;
     esac;
-
   -- Capturamos quién realiza la acción para verificar propiedades
   next(op_uid) := next(input_usuario);
   next(op_lid) := next(input_laboratorio);
-
   -- ----------------------
   -- B. LÓGICA DE RESULTADO
   -- ---------------------
   next(resultado) :=
     case
-      next(input_usuario) = 0 | next(input_laboratorio) = 0 : FALSE;
-      
+      next(input_usuario) = 0 | next(input_laboratorio) = 0 : FALSE;    
       -- Si la acción fue seleccionada arriba, es exitosa por definición
       next(accion) = ingreso : TRUE;
-      next(accion) = salida  : TRUE;
-      
+      next(accion) = salida  : TRUE;    
       -- Intento: Validar permisos
-      next(accion) = intento : tiene_permiso;
-        
+      next(accion) = intento : tiene_permiso;       
       TRUE : FALSE;
     esac;
-
   -- ----------------------------------
   -- C. GESTIÓN DEL TOKEN (Hold & Clear)
   -- ----------------------------------
@@ -108,22 +89,17 @@ ASSIGN
     case
       -- 1. GENERACIÓN: Intento exitoso -> Token TRUE
       next(accion) = intento & tiene_permiso : TRUE;
-
       -- 2. RETENCIÓN: Si vamos a ingresar, MANTENER el token (para que la regla se cumpla)
-      next(accion) = ingreso : TRUE;
-      
+      next(accion) = ingreso : TRUE;     
       -- 3. LIMPIEZA: Si YA estamos ingresando, el token se borra para el futuro
       accion = ingreso : FALSE;
-      
       -- 4. FALLO: Un intento fallido borra tokens previos
       next(accion) = intento & !tiene_permiso : FALSE;
 
       TRUE : token_valido;
     esac;
-
   next(token_uid) := (next(accion) = intento & tiene_permiso) ? next(input_usuario) : token_uid;
   next(token_lid) := (next(accion) = intento & tiene_permiso) ? next(input_laboratorio) : token_lid;
-
   -- ------------------------------------
   -- D. GESTIÓN DE OCUPACIÓN (Hold & Clear)
   -- ------------------------------------
@@ -141,7 +117,6 @@ ASSIGN
       
       TRUE : ocupante_l1;
     esac;
-
   next(ocupante_l2) :=
     case
       next(accion) = ingreso & next(input_laboratorio) = l2 : next(input_usuario);
@@ -149,31 +124,22 @@ ASSIGN
       accion = salida & op_lid = l2 : 0;
       TRUE : ocupante_l2;
     esac;
-
 -- =====================
 -- 4. FAIRNESS
-
 FAIRNESS accion != ninguna
-
 -- =====================
 -- 5. PROPIEDADES CTL
-
 -- P1. Ingreso requiere permiso (vía token)
 -- Al usar la lógica "Hold", token_valido es TRUE durante el estado de ingreso.
 SPEC AG (accion = ingreso -> token_valido = TRUE)
-
 -- P2. Salida solo si hay alguien dentro
 -- Al usar la lógica "Hold", ocupante es != 0 durante el estado de salida.
 SPEC AG (accion = salida -> ( (op_lid = l1 -> ocupante_l1 != 0) & (op_lid = l2 -> ocupante_l2 != 0) ))
-
 -- P3. Resultado Exitoso = IDs válidos
 SPEC AG (resultado = TRUE -> op_uid != 0 & op_lid != 0)
-
 -- P4. Vitalidad de Ingreso
 SPEC EF (accion = ingreso & resultado = TRUE)
-
 -- P5. Vitalidad de Intento
 SPEC AG EF (accion = intento)
-
 -- P6. Vitalidad General
 SPEC AF (accion != ninguna)
